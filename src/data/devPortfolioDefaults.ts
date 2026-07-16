@@ -1,4 +1,4 @@
-import type { BuilderStep, ContactLink, DefaultSection, DesktopColorTarget, DesktopEditableTarget, DevTemplate, DevTemplateOption, PortfolioSection, SectionIcon, TemplateSettings } from '../models/portfolio'
+import type { BuilderStep, ContactLink, DefaultSection, DesktopColorTarget, DesktopEditableTarget, DevExperience, DevProject, DevTemplate, DevTemplateOption, PortfolioSection, SectionIcon, TemplateSettings } from '../models/portfolio'
 
 export const steps: Array<{ id: BuilderStep; label: string }> = [
   { id: 'identity', label: 'Identidade' }, { id: 'style', label: 'Estilo' }, { id: 'sections', label: 'Secoes' },
@@ -56,3 +56,58 @@ export const contactPresets: Array<Omit<ContactLink, 'id'>> = [
   { type: 'x', label: 'X / Twitter', value: '@seuusuario', url: 'https://x.com/seuusuario' },
   { type: 'portfolio', label: 'Portfolio', value: 'seuportfolio.com', url: 'https://seuportfolio.com' },
 ]
+
+export function createDefaultSections(): PortfolioSection[] {
+  return [
+    { id: 'about', ...defaultSections.about, enabled: true, locked: true },
+    { id: 'stack', ...defaultSections.stack, enabled: true, locked: true },
+    { id: 'projects', ...defaultSections.projects, enabled: true, locked: true },
+    { id: 'contact', ...defaultSections.contact, enabled: true, locked: true },
+  ]
+}
+
+export function createPresetDevPortfolio() {
+  const experiences: DevExperience[] = [{
+    id: crypto.randomUUID(),
+    company: 'Projetos independentes',
+    city: 'Presidente Prudente - SP',
+    role: 'Desenvolvedor de Sistemas',
+    activities: 'Desenvolvimento de sistemas web, automacoes, dashboards e solucoes digitais para processos reais, da interface ao banco de dados e publicacao.',
+    startDate: '2024-01',
+    endDate: '',
+    current: true,
+  }]
+
+  const projects: DevProject[] = [
+    { id: crypto.randomUUID(), title: 'FinControl', description: 'Controle financeiro pessoal com dashboard, receitas, despesas, metas, categorias e arquitetura publicada na Cloudflare.', imageUrl: '', imageName: '', liveUrl: 'https://fincontrol-2os.pages.dev/', repoUrl: 'https://github.com/wendell-ramos', techs: 'Cloudflare, D1, SQL' },
+    { id: crypto.randomUUID(), title: 'Pericia Contabil', description: 'Sistema web em ASP.NET MVC para gestao de atividades de pericia contabil, usuarios, permissoes e banco PostgreSQL.', imageUrl: '', imageName: '', liveUrl: '', repoUrl: 'https://github.com/wendell-ramos', techs: 'C#, ASP.NET MVC, PostgreSQL' },
+    { id: crypto.randomUUID(), title: 'Edvaldo Films', description: 'Portfolio audiovisual responsivo para filmmaker, com trabalhos, processo, contato, dominio proprio e foco em video.', imageUrl: 'https://wendell-ramos.github.io/portfolio-wendell-ramos/assets/projeto-edvaldo-films.png', imageName: 'projeto-edvaldo-films.png', liveUrl: 'https://edvaldofilms.com.br/', repoUrl: '', techs: 'React, Vite, Cloudflare' },
+    { id: crypto.randomUUID(), title: 'Portfolio Retro', description: 'Portfolio pessoal em formato de desktop retro, com janelas, atalhos, curriculo, eventos, projetos e contato.', imageUrl: '', imageName: '', liveUrl: 'https://wendell-ramos.github.io/portfolio-wendell-ramos/', repoUrl: 'https://github.com/wendell-ramos/portfolio-wendell-ramos', techs: 'HTML, CSS, JavaScript, GitHub Pages' },
+  ]
+
+  const contacts: ContactLink[] = [
+    { id: crypto.randomUUID(), type: 'email', label: 'E-mail', value: 'wendellnascimentoramos@gmail.com', url: 'mailto:wendellnascimentoramos@gmail.com' },
+    { id: crypto.randomUUID(), type: 'github', label: 'GitHub', value: 'github.com/wendell-ramos', url: 'https://github.com/wendell-ramos' },
+    { id: crypto.randomUUID(), type: 'linkedin', label: 'LinkedIn', value: 'linkedin.com/in/wendellramos10', url: 'https://www.linkedin.com/in/wendellramos10/' },
+    { id: crypto.randomUUID(), type: 'portfolio', label: 'Portfolio', value: 'wendell-ramos.github.io/portfolio-wendell-ramos', url: 'https://wendell-ramos.github.io/portfolio-wendell-ramos/' },
+  ]
+
+  return {
+    template: 'desktop' as DevTemplate,
+    accentColor: '#2563eb',
+    templateBackgrounds: { ...defaultTemplateBackgrounds },
+    desktopAreaColors: { ...defaultDesktopAreaColors },
+    templateSettings: structuredClone(defaultTemplateSettings),
+    name: 'Wendell Ramos',
+    role: 'Desenvolvedor de Sistemas',
+    location: 'Presidente Prudente - SP',
+    headline: 'Crio sistemas web, automacoes e produtos digitais com foco em problema real.',
+    bio: 'Estudante de Sistemas de Informacao e desenvolvedor focado em sistemas web, automacoes, dashboards e solucoes praticas para organizar processos reais.',
+    profilePhoto: '',
+    experiences,
+    stackText: 'React\nTypeScript\nASP.NET MVC\nC#\nPostgreSQL\nCloudflare',
+    sections: createDefaultSections(),
+    projects,
+    contacts,
+  }
+}
