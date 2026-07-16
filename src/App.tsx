@@ -1,237 +1,41 @@
-import { type ChangeEvent, type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode, useEffect, useMemo, useState } from 'react'
+import { type ChangeEvent, type CSSProperties, type ReactNode, useEffect, useMemo, useState } from 'react'
 import './App.css'
-
-type BuilderStep = 'identity' | 'style' | 'sections' | 'projects' | 'contact' | 'preview'
-type DevTemplate = 'desktop' | 'terminal' | 'docs'
-type DesktopColorTarget = 'titlebar' | 'menu' | 'window' | 'statusbar' | 'taskbar'
-type DesktopEditableTarget = 'background' | DesktopColorTarget
-type DefaultSection = 'about' | 'stack' | 'projects' | 'contact'
-type SectionIcon = 'home' | 'user' | 'code' | 'folder' | 'mail' | 'calendar' | 'award' | 'briefcase' | 'message' | 'document' | 'terminal' | 'link'
-
-type PortfolioSection = {
-  id: string
-  title: string
-  description: string
-  icon: SectionIcon
-  backgroundColor?: string
-  enabled: boolean
-  locked?: boolean
-}
-
-type DevProject = {
-  id: string
-  title: string
-  description: string
-  imageUrl: string
-  imageName: string
-  liveUrl: string
-  repoUrl: string
-  techs: string
-}
-
-type DevExperience = {
-  id: string
-  company: string
-  city: string
-  role: string
-  activities: string
-  startDate: string
-  endDate: string
-  current: boolean
-}
-
-type ContactLink = {
-  id: string
-  type: ContactType
-  label: string
-  value: string
-  url: string
-}
-
-type ContactType = 'email' | 'github' | 'linkedin' | 'whatsapp' | 'instagram' | 'x' | 'portfolio'
-
-type DevTemplateOption = {
-  id: DevTemplate
-  label: string
-  description: string
-}
-
-type PortfolioPreviewProps = {
-  accentColor: string
-  backgroundColor: string
-  desktopAreaColors: Record<DesktopColorTarget, string>
-  bio: string
-  contacts: ContactLink[]
-  experiences: DevExperience[]
-  headline: string
-  location: string
-  name: string
-  profilePhoto: string
-  projects: DevProject[]
-  role: string
-  sections: PortfolioSection[]
-  stack: string[]
-  template: DevTemplate
-}
-
-const steps: Array<{ id: BuilderStep; label: string }> = [
-  { id: 'identity', label: 'Identidade' },
-  { id: 'style', label: 'Estilo' },
-  { id: 'sections', label: 'Secoes' },
-  { id: 'projects', label: 'Projetos' },
-  { id: 'contact', label: 'Contato' },
-  { id: 'preview', label: 'Visualizar' },
-]
-
-const devTemplates: DevTemplateOption[] = [
-  {
-    id: 'desktop',
-    label: 'Desktop retro',
-    description: 'Portfolio com area de trabalho, janelas e atalhos. Bom para devs que querem algo memoravel.',
-  },
-  {
-    id: 'terminal',
-    label: 'Terminal hacker',
-    description: 'Visual de linha de comando, logs e comandos. Bom para destacar stack e projetos tecnicos.',
-  },
-  {
-    id: 'docs',
-    label: 'Docs moderno',
-    description: 'Visual limpo, parecido com documentacao. Bom para leitura rapida e perfil profissional.',
-  },
-]
-
-const defaultSections: Record<DefaultSection, Omit<PortfolioSection, 'id' | 'enabled' | 'locked'>> = {
-  about: {
-    title: 'Sobre',
-    description: 'Resumo, trajetoria profissional, contexto e foco de atuacao.',
-    icon: 'user',
-  },
-  stack: {
-    title: 'Stack',
-    description: 'Tecnologias, ferramentas e conhecimentos principais.',
-    icon: 'code',
-  },
-  projects: {
-    title: 'Projetos',
-    description: 'Cases com descricao, tecnologias e links clicaveis.',
-    icon: 'folder',
-  },
-  contact: {
-    title: 'Contato',
-    description: 'Links para email, GitHub, LinkedIn, WhatsApp ou site.',
-    icon: 'mail',
-  },
-}
-
-const accentOptions = ['#2563eb', '#14b8a6', '#8b5cf6', '#22c55e', '#f97316']
-const backgroundOptions = ['#103f8f', '#111b44', '#020617', '#f8fafc', '#ffffff', '#0f766e']
-const defaultTemplateBackgrounds: Record<DevTemplate, string> = {
-  desktop: '#103f8f',
-  terminal: '#020617',
-  docs: '#fbfbf8',
-}
-const defaultDesktopAreaColors: Record<DesktopColorTarget, string> = {
-  titlebar: '#2563eb',
-  menu: '#d6d6ce',
-  window: '#fbfbf6',
-  statusbar: '#d6d6ce',
-  taskbar: '#d6d6d6',
-}
-const desktopColorTargets: Array<{ id: DesktopEditableTarget; label: string }> = [
-  { id: 'background', label: 'Papel de parede' },
-  { id: 'titlebar', label: 'Barra de titulo' },
-  { id: 'menu', label: 'Menu da janela' },
-  { id: 'window', label: 'Conteudo da janela' },
-  { id: 'statusbar', label: 'Rodape da janela' },
-  { id: 'taskbar', label: 'Barra de tarefas' },
-]
-const desktopAreaColorOptions = [...new Set([...accentOptions, ...backgroundOptions, '#d6d6d6'])]
-
-const sectionIconOptions: Array<{ id: SectionIcon; label: string }> = [
-  { id: 'user', label: 'Perfil' },
-  { id: 'code', label: 'Codigo' },
-  { id: 'folder', label: 'Pasta' },
-  { id: 'mail', label: 'E-mail' },
-  { id: 'calendar', label: 'Calendario' },
-  { id: 'award', label: 'Certificado' },
-  { id: 'briefcase', label: 'Servicos' },
-  { id: 'message', label: 'Depoimentos' },
-  { id: 'document', label: 'Documento' },
-  { id: 'terminal', label: 'Terminal' },
-  { id: 'link', label: 'Link' },
-]
-
-const sectionPresets: Array<Omit<PortfolioSection, 'id' | 'enabled'>> = [
-  {
-    title: 'Certificados',
-    description: 'Cursos, bootcamps, eventos e certificados relevantes.',
-    icon: 'award',
-  },
-  {
-    title: 'Eventos',
-    description: 'Hackathons, palestras, visitas tecnicas e experiencias academicas.',
-    icon: 'calendar',
-  },
-  {
-    title: 'Servicos',
-    description: 'Tipos de solucao que voce pode desenvolver para clientes.',
-    icon: 'briefcase',
-  },
-  {
-    title: 'Depoimentos',
-    description: 'Comentarios de clientes, professores, colegas ou parceiros.',
-    icon: 'message',
-  },
-]
-
-const contactPresets: Array<Omit<ContactLink, 'id'>> = [
-  {
-    type: 'email',
-    label: 'E-mail',
-    value: 'seuemail@exemplo.com',
-    url: 'mailto:seuemail@exemplo.com',
-  },
-  {
-    type: 'github',
-    label: 'GitHub',
-    value: 'github.com/seu-usuario',
-    url: 'https://github.com/seu-usuario',
-  },
-  {
-    type: 'linkedin',
-    label: 'LinkedIn',
-    value: 'linkedin.com/in/seu-perfil',
-    url: 'https://www.linkedin.com/in/seu-perfil/',
-  },
-  {
-    type: 'whatsapp',
-    label: 'WhatsApp',
-    value: '(00) 00000-0000',
-    url: 'https://wa.me/5500000000000',
-  },
-  {
-    type: 'instagram',
-    label: 'Instagram',
-    value: '@seuusuario',
-    url: 'https://www.instagram.com/seuusuario/',
-  },
-  {
-    type: 'x',
-    label: 'X / Twitter',
-    value: '@seuusuario',
-    url: 'https://x.com/seuusuario',
-  },
-  {
-    type: 'portfolio',
-    label: 'Portfolio',
-    value: 'seuportfolio.com',
-    url: 'https://seuportfolio.com',
-  },
-]
+import type {
+  BuilderStep,
+  ContactLink,
+  ContactType,
+  DesktopColorTarget,
+  DevExperience,
+  DevProject,
+  DevTemplate,
+  PortfolioDraft,
+  PortfolioPreviewProps,
+  PortfolioSection,
+  SectionIcon,
+  TemplateSettings,
+} from './models/portfolio'
+import { readPortfolioDraft, writePortfolioDraft } from './storage/portfolioDraft'
+import { defaultSectionSurface, formatExperiencePeriod, getContrastColor, moveById, sectionColorStyle, terminalSlug } from './utils/portfolio'
+import { ContactIcon, SectionIconGlyph } from './components/PortfolioIcons'
+import { DesktopGeneratedSite } from './templates/DesktopTemplate'
+import { TerminalGeneratedSite } from './templates/TerminalTemplate'
+import { DocsGeneratedSite } from './templates/DocsTemplate'
+import {
+  accentOptions,
+  backgroundOptions,
+  contactPresets,
+  defaultDesktopAreaColors,
+  defaultSections,
+  defaultTemplateBackgrounds,
+  defaultTemplateSettings,
+  devTemplates,
+  sectionIconOptions,
+  sectionPresets,
+  steps,
+} from './data/devPortfolioDefaults'
 
 function App() {
-  const [builderFlowMode] = useState<'free' | 'guided'>('free')
+  const [builderFlowMode] = useState<'free' | 'guided'>('guided')
   const [setupComplete, setSetupComplete] = useState(false)
   const [step, setStep] = useState<BuilderStep>('identity')
   const [maxUnlockedStep, setMaxUnlockedStep] = useState(0)
@@ -241,6 +45,7 @@ function App() {
   const [accentColor, setAccentColor] = useState('#2563eb')
   const [templateBackgrounds, setTemplateBackgrounds] = useState<Record<DevTemplate, string>>(defaultTemplateBackgrounds)
   const [desktopAreaColors, setDesktopAreaColors] = useState<Record<DesktopColorTarget, string>>(defaultDesktopAreaColors)
+  const [templateSettings, setTemplateSettings] = useState<TemplateSettings>(defaultTemplateSettings)
   const [name, setName] = useState('Wendell Ramos')
   const [role, setRole] = useState('Desenvolvedor de Sistemas')
   const [location, setLocation] = useState('Presidente Prudente - SP')
@@ -408,6 +213,89 @@ function App() {
       url: 'https://wendell-ramos.github.io/portfolio-wendell-ramos/',
     },
   ])
+  const [draftReady, setDraftReady] = useState(false)
+  const [draftStatus, setDraftStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+
+  const currentDraft = useMemo<PortfolioDraft>(() => (
+    {
+      version: 1,
+      updatedAt: new Date().toISOString(),
+      step,
+      maxUnlockedStep,
+      template,
+      accentColor,
+      templateBackgrounds,
+      desktopAreaColors,
+      templateSettings,
+      name,
+      role,
+      location,
+      headline,
+      bio,
+      profilePhoto,
+      experiences,
+      stackText,
+      sections,
+      projects,
+      contacts,
+    }
+  ), [accentColor, bio, contacts, desktopAreaColors, experiences, headline, location, maxUnlockedStep, name, profilePhoto, projects, role, sections, stackText, step, template, templateBackgrounds, templateSettings])
+
+  useEffect(() => {
+    let active = true
+
+    readPortfolioDraft()
+      .then((draft) => {
+        if (!active || !draft) return
+        setStep(draft.step)
+        setMaxUnlockedStep(draft.maxUnlockedStep)
+        setTemplate(draft.template)
+        setAccentColor(draft.accentColor)
+        setTemplateBackgrounds({ ...defaultTemplateBackgrounds, ...draft.templateBackgrounds })
+        setDesktopAreaColors({ ...defaultDesktopAreaColors, ...draft.desktopAreaColors })
+        setTemplateSettings({
+          desktop: { ...defaultTemplateSettings.desktop, ...draft.templateSettings.desktop },
+          terminal: { ...defaultTemplateSettings.terminal, ...draft.templateSettings.terminal },
+          docs: { ...defaultTemplateSettings.docs, ...draft.templateSettings.docs },
+        })
+        setName(draft.name)
+        setRole(draft.role)
+        setLocation(draft.location)
+        setHeadline(draft.headline)
+        setBio(draft.bio)
+        setProfilePhoto(draft.profilePhoto)
+        setExperiences(draft.experiences)
+        setStackText(draft.stackText)
+        setSections(draft.sections)
+        setProjects(draft.projects)
+        setContacts(draft.contacts)
+        setSetupComplete(true)
+        setDraftStatus('saved')
+      })
+      .catch(() => {
+        if (active) setDraftStatus('error')
+      })
+      .finally(() => {
+        if (active) setDraftReady(true)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!draftReady || !setupComplete) return
+
+    setDraftStatus('saving')
+    const timeout = window.setTimeout(() => {
+      writePortfolioDraft(currentDraft)
+        .then(() => setDraftStatus('saved'))
+        .catch(() => setDraftStatus('error'))
+    }, 500)
+
+    return () => window.clearTimeout(timeout)
+  }, [currentDraft, draftReady, setupComplete])
 
   const stack = useMemo(
     () =>
@@ -495,6 +383,8 @@ function App() {
         title: customSectionTitle.trim(),
         description: customSectionDescription.trim(),
         icon: customSectionIcon,
+        terminalCommand: terminalSlug(customSectionTitle),
+        docsGroup: 'Mais',
         enabled: true,
       },
     ])
@@ -513,6 +403,8 @@ function App() {
       {
         ...section,
         id: crypto.randomUUID(),
+        terminalCommand: terminalSlug(section.title),
+        docsGroup: 'Mais',
         enabled: true,
       },
     ])
@@ -526,6 +418,18 @@ function App() {
     setSections((current) =>
       current.map((section) => (section.id === sectionId ? { ...section, icon } : section)),
     )
+  }
+
+  function updateSectionTerminalCommand(sectionId: string, terminalCommand: string) {
+    setSections((current) => current.map((section) => (
+      section.id === sectionId ? { ...section, terminalCommand: terminalSlug(terminalCommand) } : section
+    )))
+  }
+
+  function updateSectionDocsGroup(sectionId: string, docsGroup: string) {
+    setSections((current) => current.map((section) => (
+      section.id === sectionId ? { ...section, docsGroup } : section
+    )))
   }
 
   function updateSectionColor(sectionId: string, backgroundColor: string) {
@@ -645,6 +549,18 @@ function App() {
     setContacts((current) => current.filter((contact) => contact.id !== contactId))
   }
 
+  async function exitToStart() {
+    setDraftStatus('saving')
+    try {
+      await writePortfolioDraft(currentDraft)
+      setDraftStatus('saved')
+      setSiteMode(false)
+      setSetupComplete(false)
+    } catch {
+      setDraftStatus('error')
+    }
+  }
+
   function startEmptyPortfolio() {
     setStep('identity')
     setMaxUnlockedStep(0)
@@ -654,6 +570,7 @@ function App() {
     setAccentColor('#2563eb')
     setTemplateBackgrounds(defaultTemplateBackgrounds)
     setDesktopAreaColors(defaultDesktopAreaColors)
+    setTemplateSettings(defaultTemplateSettings)
     setName('')
     setRole('')
     setLocation('')
@@ -686,6 +603,17 @@ function App() {
     setSetupComplete(true)
   }
 
+  if (!draftReady) {
+    return (
+      <main className="draft-loading-screen">
+        <div className="product-mark">
+          <span>PF</span>
+          <div><strong>Portfy</strong><small>Carregando seu rascunho...</small></div>
+        </div>
+      </main>
+    )
+  }
+
   if (!setupComplete) {
     return (
       <ProjectStartScreen
@@ -716,6 +644,7 @@ function App() {
         sections={enabledSections}
         stack={stack}
         template={template}
+        templateSettings={templateSettings}
       />
     )
   }
@@ -726,15 +655,22 @@ function App() {
         <div className="product-mark">
           <span>PF</span>
           <div>
-            <strong>Portfy Dev</strong>
-            <small>Gerador guiado de portfolio para desenvolvedores</small>
+            <strong>Portfy</strong>
+            <small>Portfolio para desenvolvedores</small>
           </div>
         </div>
-        {(builderFlowMode === 'free' || maxUnlockedStep >= steps.length - 1) && (
-          <button className="ghost-button" onClick={() => openUnlockedStep('preview', steps.length - 1)} type="button">
-            Visualizar portfolio
-          </button>
-        )}
+        <div className="flow-header-actions">
+          <span className={`draft-status is-${draftStatus}`} aria-live="polite">
+            <i />
+            {draftStatus === 'saving' ? 'Salvando...' : draftStatus === 'error' ? 'Falha ao salvar' : 'Rascunho salvo'}
+          </span>
+          <button className="ghost-button" onClick={exitToStart} type="button">Sair</button>
+          {(builderFlowMode === 'free' || maxUnlockedStep >= steps.length - 1) && (
+            <button className="ghost-button" onClick={() => openUnlockedStep('preview', steps.length - 1)} type="button">
+              Visualizar portfolio
+            </button>
+          )}
+        </div>
       </header>
 
       {builderFlowMode === 'free' && (
@@ -930,6 +866,53 @@ function App() {
                 <i style={{ backgroundColor: accentColor }} />
               </div>
             </div>
+            <div className={`template-settings-panel template-settings-${template}`}>
+              <div className="template-settings-heading">
+                <div>
+                  <strong>{template === 'desktop' ? 'Interface do sistema' : template === 'terminal' ? 'Ambiente do terminal' : 'Leitura da documentacao'}</strong>
+                  <span>{template === 'desktop' ? 'Personalize rotulos, atalhos e a janela da interface retro.' : template === 'terminal' ? 'Defina a identidade, a escala e o acabamento visual da sessao.' : 'Ajuste a identidade e a composicao de leitura do portfolio.'}</span>
+                </div>
+                <button
+                  disabled={JSON.stringify(templateSettings[template]) === JSON.stringify(defaultTemplateSettings[template])}
+                  onClick={() => setTemplateSettings((current) => ({ ...current, [template]: defaultTemplateSettings[template] }))}
+                  type="button"
+                >
+                  Restaurar estilo
+                </button>
+              </div>
+
+              {template === 'desktop' && (
+                <div className="template-settings-fields">
+                  <TextInput label="Titulo da janela inicial" onChange={(value) => setTemplateSettings((current) => ({ ...current, desktop: { ...current.desktop, homeTitle: value } }))} placeholder="Bem-vindo ao meu portfolio" value={templateSettings.desktop.homeTitle} />
+                  <TextInput label="Texto do botao iniciar" onChange={(value) => setTemplateSettings((current) => ({ ...current, desktop: { ...current.desktop, startLabel: value } }))} placeholder="iniciar" value={templateSettings.desktop.startLabel} />
+                  <label className="template-option-field"><span>Tamanho dos atalhos</span><select onChange={(event) => setTemplateSettings((current) => ({ ...current, desktop: { ...current.desktop, shortcutSize: event.target.value as TemplateSettings['desktop']['shortcutSize'] } }))} value={templateSettings.desktop.shortcutSize}><option value="small">Compacto</option><option value="medium">Padrao</option><option value="large">Grande</option></select></label>
+                  <label className="template-option-field"><span>Largura da janela</span><select onChange={(event) => setTemplateSettings((current) => ({ ...current, desktop: { ...current.desktop, windowWidth: event.target.value as TemplateSettings['desktop']['windowWidth'] } }))} value={templateSettings.desktop.windowWidth}><option value="compact">Compacta</option><option value="wide">Ampla</option></select></label>
+                  <div className="template-setting-preview desktop-setting-preview"><span>{templateSettings.desktop.startLabel || 'iniciar'}</span><strong>{templateSettings.desktop.homeTitle || 'Portfolio'}</strong></div>
+                </div>
+              )}
+
+              {template === 'terminal' && (
+                <div className="template-settings-fields">
+                  <TextInput label="Nome do ambiente" onChange={(value) => setTemplateSettings((current) => ({ ...current, terminal: { ...current.terminal, bootTitle: value } }))} placeholder="Portfolio Shell" value={templateSettings.terminal.bootTitle} />
+                  <TextInput label="Hostname" onChange={(value) => setTemplateSettings((current) => ({ ...current, terminal: { ...current.terminal, host: terminalSlug(value) } }))} placeholder="portfolio" value={templateSettings.terminal.host} />
+                  <TextInput label="Shell exibido" onChange={(value) => setTemplateSettings((current) => ({ ...current, terminal: { ...current.terminal, shell: value } }))} placeholder="bash" value={templateSettings.terminal.shell} />
+                  <label className="template-option-field"><span>Escala do texto</span><select onChange={(event) => setTemplateSettings((current) => ({ ...current, terminal: { ...current.terminal, textScale: event.target.value as TemplateSettings['terminal']['textScale'] } }))} value={templateSettings.terminal.textScale}><option value="small">Compacta</option><option value="medium">Padrao</option><option value="large">Ampliada</option></select></label>
+                  <label className="template-toggle-field"><input checked={templateSettings.terminal.scanlines} onChange={(event) => setTemplateSettings((current) => ({ ...current, terminal: { ...current.terminal, scanlines: event.target.checked } }))} type="checkbox" /><span><strong>Linhas de monitor</strong><small>Efeito sutil de tela CRT.</small></span></label>
+                  <div className={`template-setting-preview terminal-setting-preview terminal-preview-${templateSettings.terminal.textScale} ${templateSettings.terminal.scanlines ? 'has-scanlines' : ''}`}><span>{templateSettings.terminal.bootTitle || 'Portfolio Shell'} v1.0.0</span><code>dev@{templateSettings.terminal.host || 'portfolio'}:~/portfolio$</code><small>{templateSettings.terminal.shell || 'bash'}</small></div>
+                </div>
+              )}
+
+              {template === 'docs' && (
+                <div className="template-settings-fields">
+                  <TextInput label="Selo do cabecalho" onChange={(value) => setTemplateSettings((current) => ({ ...current, docs: { ...current.docs, badge: value } }))} placeholder="Docs" value={templateSettings.docs.badge} />
+                  <TextInput label="Titulo da sidebar" onChange={(value) => setTemplateSettings((current) => ({ ...current, docs: { ...current.docs, sidebarLabel: value } }))} placeholder="DOCUMENTATION" value={templateSettings.docs.sidebarLabel} />
+                  <TextInput label="Versao exibida" onChange={(value) => setTemplateSettings((current) => ({ ...current, docs: { ...current.docs, version: value } }))} placeholder="v1.0" value={templateSettings.docs.version} />
+                  <label className="template-option-field"><span>Largura de leitura</span><select onChange={(event) => setTemplateSettings((current) => ({ ...current, docs: { ...current.docs, contentWidth: event.target.value as TemplateSettings['docs']['contentWidth'] } }))} value={templateSettings.docs.contentWidth}><option value="focused">Focada</option><option value="wide">Ampla</option></select></label>
+                  <label className="template-toggle-field"><input checked={templateSettings.docs.showPageIndex} onChange={(event) => setTemplateSettings((current) => ({ ...current, docs: { ...current.docs, showPageIndex: event.target.checked } }))} type="checkbox" /><span><strong>Indice lateral</strong><small>Atalhos da pagina atual.</small></span></label>
+                  <div className={`template-setting-preview docs-setting-preview docs-preview-${templateSettings.docs.contentWidth}`}><span>{templateSettings.docs.sidebarLabel || 'DOCUMENTATION'}</span><strong>Portfolio <b>{templateSettings.docs.badge || 'Docs'}</b></strong><small>{templateSettings.docs.version || 'v1.0'}{templateSettings.docs.showPageIndex ? ' / indice ativo' : ''}</small></div>
+                </div>
+              )}
+            </div>
             {/*
               <div className="desktop-area-customizer">
                 <div className="desktop-area-customizer-copy">
@@ -1013,13 +996,16 @@ function App() {
         {step === 'sections' && (
           <StepBlock
             eyebrow="Etapa 3"
-            title="Monte as secoes do portfolio."
-            description="A pessoa pode remover o que nao quiser e adicionar secoes proprias."
+            title={template === 'desktop' ? 'Monte os atalhos e janelas do Desktop.' : template === 'terminal' ? 'Defina os comandos do Terminal.' : 'Organize as paginas da documentacao.'}
+            description={template === 'desktop' ? 'Cada secao vira um atalho com icone e uma janela propria.' : template === 'terminal' ? 'Cada secao vira um comando textual. Icones e controles visuais nao fazem parte deste estilo.' : 'Cada secao vira uma pagina agrupada na navegacao lateral do Docs.'}
           >
-            <div className="preset-section-grid">
+            <TemplateEditorBanner template={template} />
+            <div className={`preset-section-grid preset-section-${template}`}>
               {sectionPresets.map((section) => (
                 <button key={section.title} onClick={() => addPresetSection(section)} type="button">
-                  <SectionIconGlyph icon={section.icon} />
+                  {template === 'desktop' && <SectionIconGlyph icon={section.icon} />}
+                  {template === 'terminal' && <code>./{terminalSlug(section.title)}</code>}
+                  {template === 'docs' && <small>Nova pagina</small>}
                   <strong>{section.title}</strong>
                   <span>{section.description}</span>
                 </button>
@@ -1028,39 +1014,51 @@ function App() {
 
             <div className="section-manager">
               {sections.map((section, index) => (
-                <article className={section.enabled ? 'managed-section is-active' : 'managed-section'} key={section.id}>
+                <article className={`${section.enabled ? 'managed-section is-active' : 'managed-section'} managed-section-${template}`} key={section.id}>
                   <div className="managed-section-summary">
-                    <SectionIconGlyph icon={section.icon} />
+                    {template === 'desktop' && <SectionIconGlyph icon={section.icon} />}
+                    {template === 'terminal' && <code className="section-terminal-command">$ {section.terminalCommand || terminalSlug(section.title)}</code>}
+                    {template === 'docs' && <span className="section-docs-page">PAGE</span>}
                     <div>
                       <strong>{section.title}</strong>
                       <p>{section.description}</p>
                     </div>
                   </div>
                   <div className="section-actions">
-                    <label className="section-icon-select">
-                      <span>Icone</span>
-                      <select
-                        onChange={(event) => updateSectionIcon(section.id, event.target.value as SectionIcon)}
-                        value={section.icon}
-                      >
-                        {sectionIconOptions.map((icon) => <option key={icon.id} value={icon.id}>{icon.label}</option>)}
-                      </select>
-                    </label>
-                    <label className="section-color-control">
-                      <span
-                        className="section-color-swatch"
-                        style={{ backgroundColor: section.backgroundColor || defaultSectionSurface(template) }}
-                      />
-                      <span>Cor</span>
-                      <input
-                        aria-label={`Escolher cor da secao ${section.title}`}
-                        onChange={(event) => updateSectionColor(section.id, event.target.value)}
-                        type="color"
-                        value={section.backgroundColor || defaultSectionSurface(template)}
-                      />
-                    </label>
-                    {section.backgroundColor && (
-                      <button onClick={() => updateSectionColor(section.id, '')} type="button">Cor padrao</button>
+                    {template === 'desktop' && (
+                      <>
+                        <label className="section-icon-select">
+                          <span>Icone</span>
+                          <select onChange={(event) => updateSectionIcon(section.id, event.target.value as SectionIcon)} value={section.icon}>
+                            {sectionIconOptions.map((icon) => <option key={icon.id} value={icon.id}>{icon.label}</option>)}
+                          </select>
+                        </label>
+                        <label className="section-color-control">
+                          <span className="section-color-swatch" style={{ backgroundColor: section.backgroundColor || defaultSectionSurface(template) }} />
+                          <span>Cor</span>
+                          <input aria-label={`Escolher cor da secao ${section.title}`} onChange={(event) => updateSectionColor(section.id, event.target.value)} type="color" value={section.backgroundColor || defaultSectionSurface(template)} />
+                        </label>
+                        {section.backgroundColor && <button onClick={() => updateSectionColor(section.id, '')} type="button">Cor padrao</button>}
+                      </>
+                    )}
+                    {template === 'terminal' && (
+                      <label className="section-template-field section-terminal-field">
+                        <span>Comando</span>
+                        <b>./</b>
+                        <input aria-label={`Comando da secao ${section.title}`} onChange={(event) => updateSectionTerminalCommand(section.id, event.target.value)} value={section.terminalCommand || terminalSlug(section.title)} />
+                      </label>
+                    )}
+                    {template === 'docs' && (
+                      <label className="section-template-field">
+                        <span>Grupo da sidebar</span>
+                        <select onChange={(event) => updateSectionDocsGroup(section.id, event.target.value)} value={section.docsGroup || 'Mais'}>
+                          <option value="Comece aqui">Comece aqui</option>
+                          <option value="Perfil">Perfil</option>
+                          <option value="Trabalho">Trabalho</option>
+                          <option value="Conecte-se">Conecte-se</option>
+                          <option value="Mais">Mais</option>
+                        </select>
+                      </label>
                     )}
                     <button disabled={index === 0} onClick={() => moveSection(section.id, -1)} type="button">
                       Subir
@@ -1090,43 +1088,40 @@ function App() {
                 rows={3}
                 value={customSectionDescription}
               />
-              <div className="form-block">
-                <label>Icone da secao</label>
-                <div className="section-icon-picker" role="group" aria-label="Escolha o icone da nova secao">
-                  {sectionIconOptions.map((icon) => (
-                    <button
-                      aria-label={icon.label}
-                      aria-pressed={customSectionIcon === icon.id}
-                      className={customSectionIcon === icon.id ? 'is-active' : ''}
-                      key={icon.id}
-                      onClick={() => setCustomSectionIcon(icon.id)}
-                      type="button"
-                    >
-                      <SectionIconGlyph icon={icon.id} />
-                      <span>{icon.label}</span>
-                    </button>
-                  ))}
+              {template === 'desktop' && (
+                <div className="form-block">
+                  <label>Icone do atalho</label>
+                  <div className="section-icon-picker" role="group" aria-label="Escolha o icone da nova secao">
+                    {sectionIconOptions.map((icon) => (
+                      <button aria-label={icon.label} aria-pressed={customSectionIcon === icon.id} className={customSectionIcon === icon.id ? 'is-active' : ''} key={icon.id} onClick={() => setCustomSectionIcon(icon.id)} type="button">
+                        <SectionIconGlyph icon={icon.id} /><span>{icon.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+              {template === 'terminal' && <p className="template-form-hint"><code>./{terminalSlug(customSectionTitle) || 'novo-comando'}</code> sera criado a partir do nome da secao.</p>}
+              {template === 'docs' && <p className="template-form-hint">A nova pagina sera adicionada inicialmente ao grupo <strong>Mais</strong>.</p>}
               <button className="primary-button" onClick={addCustomSection} type="button">
                 Adicionar secao
               </button>
             </div>
 
             <TextArea label="Stack, uma tecnologia por linha" onChange={setStackText} placeholder={'React\nTypeScript\nPostgreSQL'} rows={6} value={stackText} />
-            <SectionsMiniPreview sections={enabledSections} stack={stack} />
+            <SectionsMiniPreview sections={enabledSections} stack={stack} template={template} />
           </StepBlock>
         )}
 
         {step === 'projects' && (
           <StepBlock
             eyebrow="Etapa 4"
-            title="Adicione projetos com links clicaveis."
-            description="Cada projeto pode ter link publico, repositorio e tecnologias usadas."
+            title={template === 'desktop' ? 'Preencha os projetos exibidos nas janelas.' : template === 'terminal' ? 'Cadastre as entradas de ~/projects.' : 'Documente seus projetos como cases.'}
+            description={template === 'terminal' ? 'O Terminal apresenta titulo, descricao, stack e links como texto. Imagens de capa nao sao usadas neste estilo.' : template === 'desktop' ? 'Cada projeto pode ter capa, link publicado, repositorio e tecnologias.' : 'Cada projeto vira um artigo tecnico com capa, contexto, stack e links.'}
           >
+            <TemplateEditorBanner template={template} />
             <div className="item-list">
               {projects.map((project, index) => (
-                <article className="editable-item" key={project.id}>
+                <article className={`editable-item editable-item-${template}`} key={project.id}>
                   <div className="item-heading">
                     <strong>Projeto {index + 1}</strong>
                     <div className="inline-actions">
@@ -1154,7 +1149,7 @@ function App() {
                     rows={3}
                     value={project.description}
                   />
-                  <div className="project-image-field">
+                  {template !== 'terminal' && <div className="project-image-field">
                     <div className="project-image-copy">
                       <strong>Imagem de capa</strong>
                       <span>Envie um arquivo JPG, PNG ou WebP de ate 5 MB.</span>
@@ -1184,7 +1179,7 @@ function App() {
                     {projectImageErrors[project.id] && (
                       <p className="project-image-error" role="alert">{projectImageErrors[project.id]}</p>
                     )}
-                  </div>
+                  </div>}
                   <TextInput
                     label="Link publicado"
                     onChange={(value) => updateProject(project.id, 'liveUrl', value)}
@@ -1209,17 +1204,18 @@ function App() {
             <button className="primary-button" onClick={addProject} type="button">
               Adicionar projeto
             </button>
-            <ProjectsMiniPreview projects={projects} />
+            <ProjectsMiniPreview projects={projects} template={template} />
           </StepBlock>
         )}
 
         {step === 'contact' && (
           <StepBlock
             eyebrow="Etapa 5"
-            title="Adicione links de contato."
-            description="Escolha redes predefinidas com icones e edite texto/URL conforme precisar."
+            title={template === 'desktop' ? 'Adicione contatos com atalhos visuais.' : template === 'terminal' ? 'Configure a saida do comando contact.' : 'Organize os canais da pagina Contato.'}
+            description={template === 'terminal' ? 'As redes aparecem como linhas de texto clicaveis, sem icones.' : template === 'desktop' ? 'Escolha redes predefinidas com seus icones e edite texto e URL.' : 'Cada canal aparece como uma referencia organizada com icone e link.'}
           >
-            <div className="preset-contact-grid">
+            <TemplateEditorBanner template={template} />
+            <div className={`preset-contact-grid preset-contact-${template}`}>
               {contactPresets.map((preset) => (
                 <button
                   className={`preset-contact contact-${preset.type}`}
@@ -1227,7 +1223,8 @@ function App() {
                   onClick={() => addPresetContact(preset)}
                   type="button"
                 >
-                  <ContactIcon type={preset.type} />
+                  {template !== 'terminal' && <ContactIcon type={preset.type} />}
+                  {template === 'terminal' && <code>[{preset.type}]</code>}
                   {preset.label}
                 </button>
               ))}
@@ -1235,10 +1232,11 @@ function App() {
 
             <div className="item-list">
               {contacts.map((contact) => (
-                <article className="editable-item" key={contact.id}>
+                <article className={`editable-item editable-item-${template}`} key={contact.id}>
                   <div className="item-heading">
                     <strong className="contact-item-title">
-                      <ContactIcon type={contact.type} />
+                      {template !== 'terminal' && <ContactIcon type={contact.type} />}
+                      {template === 'terminal' && <code>[{contact.type}]</code>}
                       {contact.label}
                     </strong>
                     <button onClick={() => removeContact(contact.id)} type="button">
@@ -1272,7 +1270,7 @@ function App() {
                 </article>
               ))}
             </div>
-            <ContactsMiniPreview contacts={contacts} />
+            <ContactsMiniPreview contacts={contacts} template={template} />
           </StepBlock>
         )}
 
@@ -1334,8 +1332,8 @@ function ProjectStartScreen({ onEmpty, onPreset }: { onEmpty: () => void; onPres
         <div className="product-mark">
           <span>PF</span>
           <div>
-            <strong>Portfy Dev</strong>
-            <small>Novo portfolio</small>
+            <strong>Portfy</strong>
+            <small>Gerador de portfolios</small>
           </div>
         </div>
         <div className="project-start-copy">
@@ -1360,57 +1358,6 @@ function ProjectStartScreen({ onEmpty, onPreset }: { onEmpty: () => void; onPres
       </section>
     </main>
   )
-}
-
-function moveById<T extends { id: string }>(items: T[], id: string, direction: -1 | 1) {
-  const index = items.findIndex((item) => item.id === id)
-  const nextIndex = index + direction
-
-  if (index < 0 || nextIndex < 0 || nextIndex >= items.length) {
-    return items
-  }
-
-  const next = [...items]
-  const [item] = next.splice(index, 1)
-  next.splice(nextIndex, 0, item)
-  return next
-}
-
-function defaultSectionSurface(template: DevTemplate) {
-  return template === 'docs' ? '#ffffff' : template === 'terminal' ? '#071426' : '#f8fafc'
-}
-
-function getContrastColor(color: string) {
-  const normalized = color.replace('#', '')
-  if (!/^[0-9a-f]{6}$/i.test(normalized)) return '#111827'
-
-  const red = Number.parseInt(normalized.slice(0, 2), 16)
-  const green = Number.parseInt(normalized.slice(2, 4), 16)
-  const blue = Number.parseInt(normalized.slice(4, 6), 16)
-  const luminance = (red * 299 + green * 587 + blue * 114) / 1000
-
-  return luminance > 150 ? '#111827' : '#f8fafc'
-}
-
-function sectionColorStyle(section: PortfolioSection): CSSProperties | undefined {
-  if (!section.backgroundColor) return undefined
-
-  return {
-    backgroundColor: section.backgroundColor,
-    color: getContrastColor(section.backgroundColor),
-    '--section-foreground': getContrastColor(section.backgroundColor),
-  } as CSSProperties
-}
-
-function formatExperiencePeriod(experience: DevExperience) {
-  const months = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
-  const formatMonth = (value: string) => {
-    const [year, month] = value.split('-')
-    return year && month ? `${months[Number(month) - 1]} ${year}` : ''
-  }
-  const start = formatMonth(experience.startDate) || 'Inicio nao informado'
-  const end = experience.current ? 'Atual' : formatMonth(experience.endDate) || 'Saida nao informada'
-  return `${start} - ${end}`
 }
 
 function IdentityMiniPreview({
@@ -1490,13 +1437,53 @@ function ColorMiniPreview({
   )
 }
 
+function TemplateEditorBanner({ template }: { template: DevTemplate }) {
+  return (
+    <aside className={`template-editor-banner template-editor-${template}`}>
+      <span>{template === 'desktop' ? 'Desktop retro' : template === 'terminal' ? 'Terminal hacker' : 'Docs moderno'}</span>
+      <div>
+        <strong>{template === 'desktop' ? 'Editando atalhos e janelas' : template === 'terminal' ? 'Editando comandos e saidas' : 'Editando paginas e navegacao'}</strong>
+        <p>{template === 'desktop' ? 'Os controles desta etapa afetam a experiencia visual do Desktop.' : template === 'terminal' ? 'Somente opcoes que fazem sentido em uma interface de linha de comando sao exibidas.' : 'Os controles desta etapa seguem a estrutura editorial de uma documentacao.'}</p>
+      </div>
+    </aside>
+  )
+}
+
 function SectionsMiniPreview({
   sections,
   stack,
+  template,
 }: {
   sections: PortfolioSection[]
   stack: string[]
+  template: DevTemplate
 }) {
+  if (template === 'terminal') {
+    return (
+      <aside className="mini-preview template-data-preview terminal-data-preview">
+        <span>Comandos disponiveis</span>
+        <div className="terminal-section-preview">
+          {sections.map((section) => <p key={section.id}><code>$ {section.terminalCommand || terminalSlug(section.title)}</code><span>{section.description}</span></p>)}
+        </div>
+        <p className="terminal-preview-stack"><code>$ stack</code> {stack.slice(0, 5).join(' | ')}</p>
+      </aside>
+    )
+  }
+
+  if (template === 'docs') {
+    return (
+      <aside className="mini-preview template-data-preview docs-data-preview">
+        <span>Paginas na documentacao</span>
+        <div className="docs-section-preview">
+          {[...new Set(sections.map((section) => section.docsGroup || 'Mais'))].map((group) => (
+            <div key={group}><strong>{group}</strong>{sections.filter((section) => (section.docsGroup || 'Mais') === group).map((section) => <span key={section.id}>{section.title}</span>)}</div>
+          ))}
+        </div>
+        <small>{stack.length} tecnologias na pagina Stack</small>
+      </aside>
+    )
+  }
+
   return (
     <aside className="mini-preview">
       <span>Como as secoes vao aparecer</span>
@@ -1526,11 +1513,22 @@ function SectionsMiniPreview({
   )
 }
 
-function ProjectsMiniPreview({ projects }: { projects: DevProject[] }) {
+function ProjectsMiniPreview({ projects, template }: { projects: DevProject[]; template: DevTemplate }) {
+  if (template === 'terminal') {
+    return (
+      <aside className="mini-preview template-data-preview terminal-data-preview">
+        <span>Saida de $ projects</span>
+        <div className="terminal-project-mini-list">
+          {projects.slice(0, 3).map((project, index) => <div key={project.id}><code>[{String(index + 1).padStart(2, '0')}] {project.title || 'projeto-sem-nome'}</code><p>{project.description || 'descricao pendente'}</p><small>stack: {project.techs || 'nao informada'}</small></div>)}
+        </div>
+      </aside>
+    )
+  }
+
   return (
     <aside className="mini-preview">
-      <span>Previa dos cards de projeto</span>
-      <div className="project-mini-grid">
+      <span>{template === 'desktop' ? 'Previa dos cards na janela' : 'Previa dos cases documentados'}</span>
+      <div className={`project-mini-grid project-mini-${template}`}>
         {projects.slice(0, 3).map((project) => (
           <div key={project.id}>
             {project.imageUrl && <img alt="" className="project-mini-cover" src={project.imageUrl} />}
@@ -1544,10 +1542,21 @@ function ProjectsMiniPreview({ projects }: { projects: DevProject[] }) {
   )
 }
 
-function ContactsMiniPreview({ contacts }: { contacts: ContactLink[] }) {
+function ContactsMiniPreview({ contacts, template }: { contacts: ContactLink[]; template: DevTemplate }) {
+  if (template === 'terminal') {
+    return (
+      <aside className="mini-preview template-data-preview terminal-data-preview">
+        <span>Saida de $ contact</span>
+        <div className="terminal-contact-mini-list">
+          {contacts.map((contact) => <p key={contact.id}><code>[{contact.type}]</code><span>{contact.value || 'nao informado'}</span></p>)}
+        </div>
+      </aside>
+    )
+  }
+
   return (
     <aside className="mini-preview">
-      <span>Previa dos links de contato</span>
+      <span>{template === 'desktop' ? 'Previa dos atalhos de contato' : 'Previa das referencias de contato'}</span>
       <div className="contact-mini-list">
         {contacts.map((contact) => (
           <a className={`contact-link contact-${contact.type}`} href={contact.url} key={contact.id}>
@@ -1560,53 +1569,6 @@ function ContactsMiniPreview({ contacts }: { contacts: ContactLink[] }) {
         ))}
       </div>
     </aside>
-  )
-}
-
-function ContactIcon({ type }: { type: ContactType }) {
-  return (
-    <b className={`contact-icon contact-${type}`} aria-hidden="true">
-      {type === 'email' && (
-        <svg viewBox="0 0 24 24">
-          <path d="M4 6h16v12H4z" />
-          <path d="m4 7 8 6 8-6" />
-        </svg>
-      )}
-      {type === 'github' && (
-        <svg viewBox="0 0 24 24">
-          <path d="M12 2.8a9.2 9.2 0 0 0-2.9 17.9c.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.5-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 .1 1.6 1.1 1.6 1.1.9 1.6 2.4 1.1 2.9.8.1-.7.4-1.1.7-1.4-2.2-.3-4.6-1.1-4.6-5a3.9 3.9 0 0 1 1-2.7 3.6 3.6 0 0 1 .1-2.6s.9-.3 2.8 1a9.7 9.7 0 0 1 5.2 0c1.9-1.3 2.8-1 2.8-1 .5 1.3.2 2.3.1 2.6a3.9 3.9 0 0 1 1 2.7c0 3.9-2.4 4.7-4.6 5 .4.3.7 1 .7 2v2.5c0 .3.2.6.7.5A9.2 9.2 0 0 0 12 2.8Z" />
-        </svg>
-      )}
-      {type === 'linkedin' && (
-        <svg viewBox="0 0 24 24">
-          <path d="M5.2 9.1h3.1v9.7H5.2zM6.8 5.2a1.8 1.8 0 1 1 0 3.5 1.8 1.8 0 0 1 0-3.5ZM10.4 9.1h3v1.3c.4-.8 1.5-1.6 3-1.6 3.2 0 3.8 2.1 3.8 4.8v5.2h-3.1v-4.6c0-1.1 0-2.5-1.5-2.5s-1.8 1.2-1.8 2.4v4.7h-3.1V9.1Z" />
-        </svg>
-      )}
-      {type === 'whatsapp' && (
-        <svg viewBox="0 0 24 24">
-          <path d="M12 3.4a8.4 8.4 0 0 0-7.1 12.9L4 20.6l4.4-1A8.4 8.4 0 1 0 12 3.4Z" />
-          <path d="M9.3 8.2c-.2-.4-.4-.4-.7-.4h-.5c-.2 0-.5.1-.8.4-.3.4-1 1-1 2.3s1 2.7 1.1 2.9c.1.2 2 3.2 4.9 4.3 2.4.9 2.9.7 3.4.7.5 0 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4s-.2-.2-.5-.4l-1.8-.9c-.3-.1-.5-.2-.7.2l-.7.9c-.1.2-.3.2-.6.1-.3-.2-1.2-.4-2.3-1.4-.8-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6l.5-.6c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5Z" />
-        </svg>
-      )}
-      {type === 'instagram' && (
-        <svg viewBox="0 0 24 24">
-          <rect x="4" y="4" width="16" height="16" rx="5" />
-          <circle cx="12" cy="12" r="3.5" />
-          <circle cx="16.8" cy="7.2" r=".8" />
-        </svg>
-      )}
-      {type === 'x' && (
-        <svg viewBox="0 0 24 24">
-          <path d="M4.5 4.5h4.2l4.1 5.6 4.9-5.6h1.9l-5.9 6.8 6.1 8.2h-4.2l-4.5-6.1-5.4 6.1H3.8l6.4-7.3Z" />
-        </svg>
-      )}
-      {type === 'portfolio' && (
-        <svg viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="8.5" />
-          <path d="M3.8 12h16.4M12 3.5c2 2.2 3.1 5 3.1 8.5S14 18.3 12 20.5c-2-2.2-3.1-5-3.1-8.5S10 5.7 12 3.5Z" />
-        </svg>
-      )}
-    </b>
   )
 }
 
@@ -1749,850 +1711,6 @@ function GeneratedDevSite({
   )
 }
 
-function DesktopGeneratedSite({
-  accentColor,
-  backgroundColor,
-  desktopAreaColors,
-  bio,
-  contacts,
-  experiences,
-  headline,
-  location,
-  name,
-  profilePhoto,
-  projects,
-  role,
-  sections,
-  stack,
-  onBackgroundColorChange,
-  onDesktopAreaColorChange,
-}: PortfolioPreviewProps & {
-  onBackgroundColorChange: (color: string) => void
-  onDesktopAreaColorChange: (target: DesktopColorTarget, color: string) => void
-}) {
-  const [activeSection, setActiveSection] = useState('home')
-  const [windowOpen, setWindowOpen] = useState(true)
-  const [maximized, setMaximized] = useState(false)
-  const [booting, setBooting] = useState(true)
-  const [editingColors, setEditingColors] = useState(false)
-  const [selectedColorTarget, setSelectedColorTarget] = useState<DesktopEditableTarget>('titlebar')
-  const style = {
-    '--custom-accent': accentColor,
-    '--site-background': backgroundColor,
-    '--site-foreground': getContrastColor(backgroundColor),
-    '--desktop-titlebar': desktopAreaColors.titlebar,
-    '--desktop-titlebar-foreground': getContrastColor(desktopAreaColors.titlebar),
-    '--desktop-menu': desktopAreaColors.menu,
-    '--desktop-menu-foreground': getContrastColor(desktopAreaColors.menu),
-    '--desktop-window-surface': desktopAreaColors.window,
-    '--desktop-window-foreground': getContrastColor(desktopAreaColors.window),
-    '--section-foreground': getContrastColor(desktopAreaColors.window),
-    '--desktop-statusbar': desktopAreaColors.statusbar,
-    '--desktop-statusbar-foreground': getContrastColor(desktopAreaColors.statusbar),
-    '--desktop-taskbar': desktopAreaColors.taskbar,
-    '--desktop-taskbar-foreground': getContrastColor(desktopAreaColors.taskbar),
-  } as CSSProperties
-  const selectedColor = selectedColorTarget === 'background' ? backgroundColor : desktopAreaColors[selectedColorTarget]
-  const selectedColorLabel = desktopColorTargets.find((item) => item.id === selectedColorTarget)?.label ?? 'Area'
-  const selectedDefaultColor = selectedColorTarget === 'background'
-    ? defaultTemplateBackgrounds.desktop
-    : defaultDesktopAreaColors[selectedColorTarget]
-  const activeDefinition = sections.find((section) => section.id === activeSection)
-  const visibleProjects = projects.filter((project) => project.title.trim())
-  const visibleContacts = contacts.filter((contact) => contact.value.trim() && contact.url.trim())
-  const terminalUser = name.trim().toLowerCase().replaceAll(' ', '-') || 'dev'
-  const initials = name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-  const displayInitials = initials || 'PF'
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setBooting(false), 1100)
-    return () => window.clearTimeout(timer)
-  }, [])
-
-  function openSection(sectionId: string) {
-    setActiveSection(sectionId)
-    setWindowOpen(true)
-    setMaximized(false)
-  }
-
-  function selectColorArea(event: ReactMouseEvent, target: DesktopEditableTarget) {
-    if (!editingColors) return
-    event.preventDefault()
-    event.stopPropagation()
-    setSelectedColorTarget(target)
-  }
-
-  function changeSelectedColor(color: string) {
-    if (selectedColorTarget === 'background') {
-      onBackgroundColorChange(color)
-      return
-    }
-    onDesktopAreaColorChange(selectedColorTarget, color)
-  }
-
-  function colorAreaClass(target: DesktopEditableTarget) {
-    if (!editingColors) return ''
-    return selectedColorTarget === target ? 'is-color-selectable is-color-selected' : 'is-color-selectable'
-  }
-
-  function renderWindowContent(): ReactNode {
-    if (activeSection === 'home') {
-      return (
-        <div className={bio || stack.length ? 'desktop-home-layout' : 'desktop-home-layout is-single'}>
-          <div className="desktop-home-content">
-            <p className="desktop-window-kicker">Ola, mundo.</p>
-            <h1>
-              {name ? <>Eu sou <strong>{name}</strong>{role ? `, ${role.toLowerCase()}.` : '.'}</> : role || 'Portfolio em construcao.'}
-            </h1>
-            {headline && <p>{headline}</p>}
-            {location && <span className="desktop-location">{location}</span>}
-            <div className="desktop-window-actions">
-              {sections.some((section) => section.id === 'projects') && (
-                <button onClick={() => openSection('projects')} type="button">Explorar projetos</button>
-              )}
-              {sections.some((section) => section.id === 'about') && (
-                <button onClick={() => openSection('about')} type="button">Sobre mim</button>
-              )}
-              {sections.some((section) => section.id === 'contact') && (
-                <button onClick={() => openSection('contact')} type="button">Falar comigo</button>
-              )}
-            </div>
-          </div>
-          {(bio || stack.length > 0) && (
-            <aside className="desktop-terminal-card" aria-label="Terminal com apresentacao">
-              <div><span /><span /><span /></div>
-              {bio && <><p><strong>{terminalUser}@portfolio:~$</strong> whoami</p><p>{bio}</p></>}
-              {stack.length > 0 && <><p><strong>{terminalUser}@portfolio:~$</strong> stack --top</p><p>{stack.slice(0, 4).join(' / ')}</p></>}
-              <p><strong>{terminalUser}@portfolio:~$</strong> <i /></p>
-            </aside>
-          )}
-        </div>
-      )
-    }
-
-    if (activeSection === 'about') {
-      return (
-        <div className="desktop-copy-content desktop-about-content">
-          <div className={profilePhoto ? 'desktop-profile-badge has-photo' : 'desktop-profile-badge'}>
-            {profilePhoto ? <img alt={`Foto de ${name || 'perfil'}`} src={profilePhoto} /> : displayInitials}
-          </div>
-          <div className="desktop-about-copy">
-            <p className="desktop-window-kicker">Perfil profissional</p>
-            <h2>{name ? `Sobre ${name}` : 'Sobre mim'}</h2>
-            {bio && <p>{bio}</p>}
-            {(role || location) && <span className="desktop-location">{[role, location].filter(Boolean).join(' / ')}</span>}
-            <div className="desktop-about-experience">
-              <small>Experiencia profissional</small>
-              <div className="desktop-experience-list">
-                {experiences.length === 0 && <p>Nenhuma experiencia profissional informada.</p>}
-                {experiences.map((item) => (
-                  <article key={item.id}>
-                    <div><strong>{item.role || 'Cargo nao informado'}</strong><span>{formatExperiencePeriod(item)}</span></div>
-                    <small>{item.company || 'Empresa nao informada'}{item.city ? ` / ${item.city}` : ''}</small>
-                    {item.activities && <p>{item.activities}</p>}
-                  </article>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    if (activeSection === 'stack') {
-      return (
-        <div className="desktop-copy-content">
-          <p className="desktop-window-kicker">Ferramentas e tecnologias</p>
-          <h2>Habilidades</h2>
-          {stack.length === 0 && <DesktopEmptyState message="Nenhuma tecnologia adicionada." />}
-          <div className="desktop-stack-list">
-            {stack.map((item, index) => (
-              <span key={item}><small>{String(index + 1).padStart(2, '0')}</small>{item}</span>
-            ))}
-          </div>
-        </div>
-      )
-    }
-
-    if (activeSection === 'projects') {
-      return (
-        <div className="desktop-project-explorer">
-          <div className="desktop-project-list">
-            {visibleProjects.length === 0 && <DesktopEmptyState message="Nenhum projeto publicado." />}
-            {visibleProjects.map((project, index) => (
-              <article key={project.id}>
-                <div className={project.imageUrl ? 'desktop-project-cover has-image' : 'desktop-project-cover'}>
-                  {project.imageUrl ? (
-                    <>
-                      <img
-                        alt={`Capa do projeto ${project.title}`}
-                        onError={(event) => { event.currentTarget.hidden = true }}
-                        src={project.imageUrl}
-                      />
-                      <div className="desktop-project-cover-caption"><span>PROJETO</span><strong>{project.title}</strong></div>
-                    </>
-                  ) : (
-                    <div><span>PROJETO</span><strong>{project.title}</strong></div>
-                  )}
-                  <small>{String(index + 1).padStart(2, '0')}</small>
-                </div>
-                <div className="desktop-project-card-content">
-                  <p className="desktop-window-kicker">Projeto selecionado</p>
-                  <h3>{project.title}</h3>
-                  <p>{project.description}</p>
-                  <div className="desktop-project-techs">
-                    {project.techs.split(',').map((tech) => tech.trim()).filter(Boolean).map((tech) => <span key={tech}>{tech}</span>)}
-                  </div>
-                  <div className="desktop-project-links">
-                    {project.liveUrl && <a href={project.liveUrl} rel="noreferrer" target="_blank">Visitar projeto</a>}
-                    {project.repoUrl && <a href={project.repoUrl} rel="noreferrer" target="_blank">Repositorio</a>}
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      )
-    }
-
-    if (activeSection === 'contact') {
-      return (
-        <div className="desktop-copy-content">
-          <p className="desktop-window-kicker">Canais disponiveis</p>
-          <h2>Vamos construir algo funcional?</h2>
-          {visibleContacts.length === 0 && <DesktopEmptyState message="Nenhum canal de contato publicado." />}
-          <div className="desktop-contact-list">
-            {visibleContacts.map((contact) => (
-              <a className={`contact-${contact.type}`} href={contact.url} key={contact.id} rel="noreferrer" target="_blank">
-                <ContactIcon type={contact.type} />
-                <span><small>{contact.label}</small>{contact.value}</span>
-              </a>
-            ))}
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div className="desktop-copy-content">
-        <p className="desktop-window-kicker">Secao personalizada</p>
-        <h2>{activeDefinition?.title}</h2>
-        <p>{activeDefinition?.description}</p>
-      </div>
-    )
-  }
-
-  const desktopItems = [
-    { id: 'home', title: 'Bem-vindo', icon: 'home' as SectionIcon },
-    ...sections.map(({ icon, id, title }) => ({
-      id,
-      icon,
-      title: id === 'about' ? 'Sobre mim' : id === 'projects' ? 'Meus projetos' : id === 'stack' ? 'Habilidades' : title,
-    })),
-  ]
-  const windowTitle = activeSection === 'home' ? 'Bem-vindo ao meu portfolio' : activeDefinition?.title ?? 'Portfolio'
-  const statusText = activeSection === 'projects'
-    ? `${visibleProjects.length} projetos encontrados`
-    : `${desktopItems.length - 1} atalhos disponiveis`
-
-  if (booting) {
-    return (
-      <section className="desktop-boot-screen" style={style}>
-        <div><strong>{displayInitials}</strong><span>PORTFOLIO</span></div>
-        <p>Carregando portfolio de {name}...</p>
-        <i aria-hidden="true"><span /></i>
-      </section>
-    )
-  }
-
-  return (
-    <section
-      className={`desktop-generated-site ${editingColors ? 'is-color-editing' : ''} ${colorAreaClass('background')}`}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) selectColorArea(event, 'background')
-      }}
-      style={style}
-    >
-      <button
-        aria-pressed={editingColors}
-        className="site-color-editor-toggle"
-        onClick={(event) => {
-          event.stopPropagation()
-          setEditingColors((current) => !current)
-        }}
-        type="button"
-      >
-        <span aria-hidden="true">#</span>{editingColors ? 'Finalizar cores' : 'Editar cores'}
-      </button>
-
-      {editingColors && (
-        <aside className="site-color-editor-panel" onClick={(event) => event.stopPropagation()}>
-          <span>Area selecionada</span>
-          <strong>{selectedColorLabel}</strong>
-          <p>Clique em outra parte destacada do site para seleciona-la.</p>
-          <label className="site-live-color-picker">
-            <span style={{ backgroundColor: selectedColor }} />
-            Escolher cor
-            <input
-              aria-label={`Escolher cor da ${selectedColorLabel}`}
-              onChange={(event) => changeSelectedColor(event.target.value)}
-              type="color"
-              value={selectedColor}
-            />
-          </label>
-          <div className="site-live-color-presets" aria-label="Cores sugeridas">
-            {desktopAreaColorOptions.map((color) => (
-              <button
-                aria-label={`Usar cor ${color}`}
-                className={selectedColor === color ? 'is-active' : ''}
-                key={color}
-                onClick={() => changeSelectedColor(color)}
-                style={{ backgroundColor: color }}
-                type="button"
-              />
-            ))}
-          </div>
-          <button
-            className="site-color-reset"
-            disabled={selectedColor === selectedDefaultColor}
-            onClick={() => changeSelectedColor(selectedDefaultColor)}
-            type="button"
-          >
-            Restaurar esta area
-          </button>
-        </aside>
-      )}
-      <div className="desktop-wallpaper-brand">
-        <strong>{displayInitials}</strong>
-        <span>{name}<br />PORTFOLIO</span>
-      </div>
-
-      <nav className="desktop-site-icons" aria-label="Aplicativos do portfolio">
-        {desktopItems.map((item) => (
-          <button className={activeSection === item.id && windowOpen ? 'is-active' : ''} key={item.id} onClick={() => openSection(item.id)} type="button">
-            <DesktopShortcutIcon icon={item.icon} />
-            <strong>{item.title}</strong>
-          </button>
-        ))}
-      </nav>
-
-      {windowOpen && (
-        <section className={maximized ? 'desktop-site-window is-maximized' : 'desktop-site-window'} aria-label={windowTitle}>
-          <header className={colorAreaClass('titlebar')} onClickCapture={(event) => selectColorArea(event, 'titlebar')}>
-            <div><span className="desktop-title-badge" aria-hidden="true">{displayInitials}</span><strong>{windowTitle}</strong></div>
-            <div className="desktop-window-controls">
-              <button aria-label="Minimizar janela" onClick={() => setWindowOpen(false)} type="button">_</button>
-              <button aria-label={maximized ? 'Restaurar janela' : 'Maximizar janela'} onClick={() => setMaximized((current) => !current)} type="button">[]</button>
-              <button aria-label="Fechar janela" onClick={() => setWindowOpen(false)} type="button">X</button>
-            </div>
-          </header>
-          <div className={`desktop-window-menu ${colorAreaClass('menu')}`} onClickCapture={(event) => selectColorArea(event, 'menu')}><span>Arquivo</span><span>Editar</span><span>Exibir</span><span>Ajuda</span></div>
-          {activeSection !== 'home' && (
-            <div className={`desktop-window-address ${colorAreaClass('menu')}`} onClickCapture={(event) => selectColorArea(event, 'menu')}><span>Endereco</span><strong>{name} / Portfolio / {windowTitle}</strong></div>
-          )}
-          <div className={`desktop-site-window-body ${colorAreaClass('window')}`} onClickCapture={(event) => selectColorArea(event, 'window')} style={activeDefinition ? sectionColorStyle(activeDefinition) : undefined}>
-            {renderWindowContent()}
-          </div>
-          <footer className={`desktop-window-status ${colorAreaClass('statusbar')}`} onClickCapture={(event) => selectColorArea(event, 'statusbar')}>{statusText} | Clique nos atalhos para explorar</footer>
-        </section>
-      )}
-
-      <footer className={`desktop-taskbar ${colorAreaClass('taskbar')}`} onClickCapture={(event) => selectColorArea(event, 'taskbar')}>
-        <button className="desktop-start-button" onClick={() => openSection('home')} type="button"><span>{displayInitials}</span> iniciar</button>
-        <button className="desktop-active-app" onClick={() => setWindowOpen(true)} type="button">{windowTitle}</button>
-        <time><span aria-hidden="true" />{new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</time>
-      </footer>
-    </section>
-  )
-}
-
-function DesktopShortcutIcon({ icon }: { icon: SectionIcon }) {
-  return <SectionIconGlyph desktop icon={icon} />
-}
-
-function DesktopEmptyState({ message }: { message: string }) {
-  return (
-    <div className="desktop-empty-state">
-      <span aria-hidden="true">i</span>
-      <p>{message}</p>
-    </div>
-  )
-}
-
-function SectionIconGlyph({ desktop = false, icon }: { desktop?: boolean; icon: SectionIcon }) {
-  const iconClass = icon === 'home' ? 'icon-computer' : icon === 'code' ? 'icon-stack' : `icon-${icon}`
-  const className = `${desktop ? 'section-icon-glyph desktop-site-icon-art' : 'section-icon-glyph'} ${iconClass}`
-
-  if (icon === 'folder' || icon === 'mail' || icon === 'home' || icon === 'user' || icon === 'briefcase' || icon === 'message' || icon === 'link') {
-    return <span className={className} aria-hidden="true"><i /><b /></span>
-  }
-
-  if (icon === 'code') {
-    return <span className={className} aria-hidden="true"><i /><i /><i /></span>
-  }
-
-  if (icon === 'calendar') {
-    return <span className={className} aria-hidden="true"><b>26</b></span>
-  }
-
-  if (icon === 'award') {
-    return <span className={className} aria-hidden="true"><i /><b>1</b></span>
-  }
-
-  if (icon === 'terminal') {
-    return <span className={className} aria-hidden="true"><b>&gt;_</b></span>
-  }
-
-  return <span className={className} aria-hidden="true"><i /><i /><i /></span>
-}
-
-function terminalSlug(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-}
-
-function TerminalGeneratedSite({
-  accentColor,
-  backgroundColor,
-  bio,
-  contacts,
-  experiences,
-  headline,
-  location,
-  name,
-  projects,
-  role,
-  sections,
-  stack,
-}: PortfolioPreviewProps) {
-  const enabledSections = sections.filter((section) => section.enabled)
-  const hasSection = (id: DefaultSection) => enabledSections.some((section) => section.id === id)
-  const customSections = enabledSections.filter((section) => !['about', 'stack', 'projects', 'contact'].includes(section.id))
-  const visibleProjects = projects.filter((project) => project.title.trim())
-  const visibleContacts = contacts.filter((contact) => contact.value.trim() && contact.url.trim())
-  const visibleExperiences = experiences.filter((experience) => experience.company.trim() || experience.role.trim())
-  const userName = terminalSlug(name).replace(/-/g, '_') || 'dev'
-  const prompt = `${userName}@portfolio:~/portfolio$`
-
-  const commands = [
-    { id: 'help', label: 'help', aliases: ['help', 'ajuda'] },
-    ...(hasSection('about') ? [{ id: 'whoami', label: 'whoami', aliases: ['whoami', 'about', 'sobre', 'bio'] }] : []),
-    ...(hasSection('stack') ? [{ id: 'stack', label: 'stack', aliases: ['stack', 'skills', 'habilidades', 'tecnologias'] }] : []),
-    ...(hasSection('projects') ? [{ id: 'projects', label: 'projects', aliases: ['projects', 'projetos', 'ls-projects'] }] : []),
-    ...(visibleExperiences.length ? [{ id: 'experience', label: 'experience', aliases: ['experience', 'experiences', 'experiencia', 'experiencias', 'work'] }] : []),
-    ...(hasSection('contact') ? [{ id: 'contact', label: 'contact', aliases: ['contact', 'contato', 'contacts'] }] : []),
-    ...customSections.map((section) => {
-      const slug = terminalSlug(section.title) || `section-${section.id}`
-      return { id: `custom:${section.id}`, label: slug, aliases: [slug, `cat-${slug}`] }
-    }),
-  ]
-
-  const [activeCommand, setActiveCommand] = useState('help')
-  const [commandInput, setCommandInput] = useState('')
-  const [commandHistory, setCommandHistory] = useState<string[]>(['help'])
-  const [unknownCommand, setUnknownCommand] = useState('')
-
-  const runCommand = (rawCommand: string) => {
-    const normalizedCommand = rawCommand.trim().toLowerCase()
-    if (!normalizedCommand) return
-
-    setCommandHistory((current) => [...current.slice(-7), normalizedCommand])
-    setCommandInput('')
-
-    if (normalizedCommand === 'clear' || normalizedCommand === 'cls') {
-      setCommandHistory([])
-      setActiveCommand('')
-      setUnknownCommand('')
-      return
-    }
-
-    const command = commands.find((item) => item.aliases.includes(normalizedCommand))
-    if (command) {
-      setActiveCommand(command.id)
-      setUnknownCommand('')
-      return
-    }
-
-    setActiveCommand('unknown')
-    setUnknownCommand(normalizedCommand)
-  }
-
-  const formatDate = (value: string) => {
-    if (!value) return ''
-    const [year, month] = value.split('-')
-    return month && year ? `${month}/${year}` : value
-  }
-
-  const renderOutput = () => {
-    if (!activeCommand) return null
-
-    if (activeCommand === 'unknown') {
-      return (
-        <div className="terminal-message is-error">
-          <p>bash: {unknownCommand}: comando nao encontrado</p>
-          <p>Digite <button onClick={() => runCommand('help')} type="button">help</button> para ver os comandos disponiveis.</p>
-        </div>
-      )
-    }
-
-    if (activeCommand === 'help') {
-      return (
-        <div className="terminal-help-output">
-          <p>Comandos disponiveis:</p>
-          <dl>
-            {commands.filter((command) => command.id !== 'help').map((command) => (
-              <div key={command.id}>
-                <dt>{command.label}</dt>
-                <dd>{command.id === 'whoami' ? 'identidade e resumo profissional' : command.id === 'stack' ? 'tecnologias e ferramentas' : command.id === 'projects' ? 'projetos publicados e repositorios' : command.id === 'experience' ? 'historico profissional' : command.id === 'contact' ? 'canais para contato' : 'arquivo de secao personalizada'}</dd>
-              </div>
-            ))}
-            <div><dt>clear</dt><dd>limpa a tela do terminal</dd></div>
-          </dl>
-          <p className="terminal-muted">Clique em um comando acima ou digite no prompt.</p>
-        </div>
-      )
-    }
-
-    if (activeCommand === 'whoami') {
-      return (
-        <div className="terminal-about-output">
-          <p><span>name</span> = "{name || 'Nao informado'}"</p>
-          <p><span>role</span> = "{role || 'Desenvolvedor'}"</p>
-          {location && <p><span>location</span> = "{location}"</p>}
-          {headline && <p><span>headline</span> = "{headline}"</p>}
-          <div className="terminal-text-file">
-            <p className="terminal-file-label">--- about.txt ---</p>
-            <p>{bio || 'Resumo profissional ainda nao informado.'}</p>
-            <p className="terminal-file-label">--- EOF ---</p>
-          </div>
-        </div>
-      )
-    }
-
-    if (activeCommand === 'stack') {
-      return (
-        <div className="terminal-list-output">
-          <p>Instalados em ~/skills:</p>
-          {stack.filter(Boolean).length ? (
-            <ol>{stack.filter(Boolean).map((item, index) => <li key={`${item}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span>{item}</li>)}</ol>
-          ) : <p className="terminal-muted">0 tecnologias cadastradas.</p>}
-        </div>
-      )
-    }
-
-    if (activeCommand === 'projects') {
-      return (
-        <div className="terminal-project-output">
-          <p>total {visibleProjects.length}</p>
-          {visibleProjects.length ? visibleProjects.map((project, index) => (
-            <article key={project.id}>
-              <h2><span>[{String(index + 1).padStart(2, '0')}]</span> {project.title}</h2>
-              {project.description && <p>{project.description}</p>}
-              {project.techs && <p className="terminal-project-stack"><span>stack:</span> {project.techs}</p>}
-              {(project.liveUrl || project.repoUrl) && (
-                <p className="terminal-project-links">
-                  {project.liveUrl && <a href={project.liveUrl} rel="noreferrer" target="_blank">[abrir projeto]</a>}
-                  {project.repoUrl && <a href={project.repoUrl} rel="noreferrer" target="_blank">[ver codigo]</a>}
-                </p>
-              )}
-            </article>
-          )) : <p className="terminal-muted">Nenhum projeto encontrado em ~/projects.</p>}
-        </div>
-      )
-    }
-
-    if (activeCommand === 'experience') {
-      return (
-        <div className="terminal-experience-output">
-          <p>Historico profissional:</p>
-          {visibleExperiences.map((experience, index) => (
-            <article key={experience.id}>
-              <p className="terminal-experience-heading"><span>{String(index + 1).padStart(2, '0')}</span> {experience.role || 'Cargo nao informado'} @ {experience.company || 'Empresa nao informada'}</p>
-              <p>{formatDate(experience.startDate) || 'inicio nao informado'} - {experience.current ? 'presente' : formatDate(experience.endDate) || 'fim nao informado'}{experience.city ? ` | ${experience.city}` : ''}</p>
-              {experience.activities && <p>{experience.activities}</p>}
-            </article>
-          ))}
-        </div>
-      )
-    }
-
-    if (activeCommand === 'contact') {
-      return (
-        <div className="terminal-contact-output">
-          <p>Canais disponiveis:</p>
-          {visibleContacts.length ? visibleContacts.map((contact) => (
-            <p key={contact.id}>
-              <span>[{contact.type}]</span>
-              <a href={contact.url} rel="noreferrer" target="_blank">{contact.value}</a>
-            </p>
-          )) : <p className="terminal-muted">Nenhum canal de contato cadastrado.</p>}
-        </div>
-      )
-    }
-
-    if (activeCommand.startsWith('custom:')) {
-      const section = customSections.find((item) => `custom:${item.id}` === activeCommand)
-      if (!section) return null
-      return (
-        <div className="terminal-text-file">
-          <p className="terminal-file-label">$ cat {terminalSlug(section.title) || 'section'}.md</p>
-          <h2># {section.title}</h2>
-          <p>{section.description || 'Esta secao ainda nao possui conteudo.'}</p>
-          <p className="terminal-file-label">--- EOF ---</p>
-        </div>
-      )
-    }
-
-    return null
-  }
-
-  const style = {
-    '--custom-accent': accentColor,
-    '--site-background': backgroundColor,
-    '--site-foreground': getContrastColor(backgroundColor),
-  } as CSSProperties
-
-  return (
-    <section className="terminal-generated-site" style={style}>
-      <header className="terminal-site-header">
-        <span className="terminal-window-controls" aria-hidden="true"><i /><i /><i /></span>
-        <strong>{userName}@portfolio: ~/portfolio</strong>
-        <span>bash</span>
-      </header>
-
-      <nav className="terminal-command-nav" aria-label="Comandos do portfolio">
-        <span>commands:</span>
-        {commands.map((command) => (
-          <button className={activeCommand === command.id ? 'is-active' : ''} key={command.id} onClick={() => runCommand(command.label)} type="button">{command.label}</button>
-        ))}
-        <button onClick={() => runCommand('clear')} type="button">clear</button>
-      </nav>
-
-      <main className="terminal-screen" role="log">
-        <div className="terminal-startup">
-          <p>Portfolio Shell v1.0.0</p>
-          <p>Session initialized for {name || userName}.</p>
-          <p className="terminal-muted">Type 'help' to list available commands.</p>
-        </div>
-
-        <div className="terminal-history" aria-label="Historico de comandos">
-          {commandHistory.slice(0, -1).map((command, index) => <p key={`${command}-${index}`}><span>{prompt}</span> {command}</p>)}
-          {commandHistory.length > 0 && <p><span>{prompt}</span> {commandHistory.at(-1)}</p>}
-        </div>
-
-        <section className="terminal-command-output" aria-live="polite">{renderOutput()}</section>
-      </main>
-
-      <form className="terminal-prompt-form" onSubmit={(event) => { event.preventDefault(); runCommand(commandInput) }}>
-        <label htmlFor="terminal-command-input"><span>{userName}@portfolio</span>:<b>~/portfolio</b>$</label>
-        <input autoComplete="off" id="terminal-command-input" onChange={(event) => setCommandInput(event.target.value)} placeholder="digite um comando" spellCheck="false" value={commandInput} />
-        <button type="submit">executar</button>
-      </form>
-
-      <footer className="terminal-status-bar">
-        <span>session: active</span>
-        <span>{visibleProjects.length} projects</span>
-        <span>{stack.filter(Boolean).length} skills</span>
-      </footer>
-    </section>
-  )
-}
-
-function DocsGeneratedSite({
-  accentColor,
-  backgroundColor,
-  bio,
-  contacts,
-  experiences,
-  headline,
-  location,
-  name,
-  profilePhoto,
-  projects,
-  role,
-  sections,
-  stack,
-}: PortfolioPreviewProps) {
-  const enabledSections = sections.filter((section) => section.enabled)
-  const visibleProjects = projects.filter((project) => project.title.trim())
-  const visibleContacts = contacts.filter((contact) => contact.value.trim() && contact.url.trim())
-  const visibleExperiences = experiences.filter((experience) => experience.company.trim() || experience.role.trim())
-  const customSections = enabledSections.filter((section) => !['about', 'stack', 'projects', 'contact'].includes(section.id))
-  const hasSection = (id: DefaultSection) => enabledSections.some((section) => section.id === id)
-  const docsPages = [
-    { id: 'overview', label: 'Overview', group: 'Comece aqui' },
-    ...(hasSection('about') ? [{ id: 'about', label: enabledSections.find((section) => section.id === 'about')?.title || 'Sobre', group: 'Perfil' }] : []),
-    ...(hasSection('stack') ? [{ id: 'stack', label: enabledSections.find((section) => section.id === 'stack')?.title || 'Stack', group: 'Perfil' }] : []),
-    ...(hasSection('projects') ? [{ id: 'projects', label: enabledSections.find((section) => section.id === 'projects')?.title || 'Projetos', group: 'Trabalho' }] : []),
-    ...(hasSection('contact') ? [{ id: 'contact', label: enabledSections.find((section) => section.id === 'contact')?.title || 'Contato', group: 'Conecte-se' }] : []),
-    ...customSections.map((section) => ({ id: `custom:${section.id}`, label: section.title, group: 'Mais' })),
-  ]
-  const [activePage, setActivePage] = useState('overview')
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const activePageDefinition = docsPages.find((page) => page.id === activePage) || docsPages[0]
-  const groups = [...new Set(docsPages.map((page) => page.group))]
-
-  const openPage = (pageId: string) => {
-    setActivePage(pageId)
-    setMobileMenuOpen(false)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const renderOverview = () => (
-    <div className="docs-page docs-overview-page">
-      <div className="docs-breadcrumb"><span>Portfolio</span><b>/</b><strong>Overview</strong></div>
-      <section className={profilePhoto ? 'docs-overview-hero has-photo' : 'docs-overview-hero'}>
-        <div>
-          <p className="docs-page-kicker">{role || 'Desenvolvedor'}</p>
-          <h1>{name || 'Portfolio tecnico'}</h1>
-          <p className="docs-page-lead">{headline || bio || 'Conheca minha trajetoria, tecnologias e projetos.'}</p>
-          <div className="docs-overview-meta">
-            {location && <span>Baseado em {location}</span>}
-            <span className="is-available">Disponivel para conexoes</span>
-          </div>
-        </div>
-        {profilePhoto && <img alt={`Foto de ${name}`} src={profilePhoto} />}
-      </section>
-
-      <div className="docs-note"><strong>Sobre este portfolio</strong><p>{bio || 'Esta documentacao apresenta meu perfil profissional e os projetos que desenvolvi.'}</p></div>
-
-      <section className="docs-content-section">
-        <div className="docs-section-title"><span>01</span><div><h2>Explore a documentacao</h2><p>Escolha uma pagina para conhecer cada parte do meu trabalho.</p></div></div>
-        <div className="docs-quick-links">
-          {docsPages.filter((page) => page.id !== 'overview').map((page) => (
-            <button key={page.id} onClick={() => openPage(page.id)} type="button"><span>{page.group}</span><strong>{page.label}</strong><b aria-hidden="true">-&gt;</b></button>
-          ))}
-        </div>
-      </section>
-
-      <section className="docs-stats" aria-label="Resumo do portfolio">
-        <div><strong>{visibleProjects.length}</strong><span>Projetos documentados</span></div>
-        <div><strong>{stack.filter(Boolean).length}</strong><span>Tecnologias principais</span></div>
-        <div><strong>{visibleExperiences.length}</strong><span>Experiencias</span></div>
-      </section>
-
-      {visibleProjects[0] && (
-        <section className="docs-content-section docs-featured-project">
-          <p className="docs-page-kicker">Case em destaque</p>
-          <div className={visibleProjects[0].imageUrl ? 'has-image' : ''}>
-            {visibleProjects[0].imageUrl && <img alt={`Capa do projeto ${visibleProjects[0].title}`} src={visibleProjects[0].imageUrl} />}
-            <div><h2>{visibleProjects[0].title}</h2><p>{visibleProjects[0].description}</p><button onClick={() => openPage('projects')} type="button">Ler documentacao do projeto</button></div>
-          </div>
-        </section>
-      )}
-    </div>
-  )
-
-  const renderAbout = () => (
-    <div className="docs-page">
-      <div className="docs-breadcrumb"><span>Perfil</span><b>/</b><strong>Sobre</strong></div>
-      <header className="docs-page-header"><p className="docs-page-kicker">Perfil profissional</p><h1>Sobre mim</h1><p>{bio || 'Resumo profissional ainda nao informado.'}</p></header>
-      {profilePhoto && <figure className="docs-profile-banner"><img alt={`Foto de ${name}`} src={profilePhoto} /><figcaption><strong>{name}</strong><span>{role}{location ? ` / ${location}` : ''}</span></figcaption></figure>}
-      <section className="docs-content-section" id="docs-experience">
-        <div className="docs-section-title"><span>01</span><div><h2>Experiencia profissional</h2><p>Trajetoria, responsabilidades e principais entregas.</p></div></div>
-        <div className="docs-experience-list">
-          {visibleExperiences.length ? visibleExperiences.map((experience) => (
-            <article key={experience.id}><div className="docs-experience-marker" /><div><div className="docs-experience-title"><h3>{experience.role || 'Cargo nao informado'}</h3><time>{formatExperiencePeriod(experience)}</time></div><strong>{experience.company || 'Empresa nao informada'}{experience.city ? ` / ${experience.city}` : ''}</strong>{experience.activities && <p>{experience.activities}</p>}</div></article>
-          )) : <div className="docs-empty-state"><strong>Nenhuma experiencia cadastrada</strong><p>Este historico sera exibido quando houver informacoes profissionais.</p></div>}
-        </div>
-      </section>
-    </div>
-  )
-
-  const renderStack = () => (
-    <div className="docs-page">
-      <div className="docs-breadcrumb"><span>Perfil</span><b>/</b><strong>Stack</strong></div>
-      <header className="docs-page-header"><p className="docs-page-kicker">Referencia tecnica</p><h1>Tecnologias e ferramentas</h1><p>Principais tecnologias utilizadas no desenvolvimento dos meus projetos.</p></header>
-      <section className="docs-content-section">
-        <div className="docs-stack-table" role="table" aria-label="Stack principal">
-          <div className="docs-stack-row is-header" role="row"><span role="columnheader">#</span><span role="columnheader">Tecnologia</span><span role="columnheader">Status</span></div>
-          {stack.filter(Boolean).map((technology, index) => <div className="docs-stack-row" key={`${technology}-${index}`} role="row"><span role="cell">{String(index + 1).padStart(2, '0')}</span><strong role="cell">{technology}</strong><span role="cell"><i /> Em uso</span></div>)}
-        </div>
-        {!stack.filter(Boolean).length && <div className="docs-empty-state"><strong>Nenhuma tecnologia cadastrada</strong><p>A stack principal aparecera aqui.</p></div>}
-      </section>
-    </div>
-  )
-
-  const renderProjects = () => (
-    <div className="docs-page">
-      <div className="docs-breadcrumb"><span>Trabalho</span><b>/</b><strong>Projetos</strong></div>
-      <header className="docs-page-header"><p className="docs-page-kicker">Cases documentados</p><h1>Projetos</h1><p>Solucoes desenvolvidas, contexto tecnico e links para explorar cada entrega.</p></header>
-      <div className="docs-project-list">
-        {visibleProjects.length ? visibleProjects.map((project, index) => (
-          <article id={`docs-project-${index + 1}`} key={project.id}>
-            <div className="docs-project-heading"><span>Case {String(index + 1).padStart(2, '0')}</span><h2>{project.title}</h2></div>
-            {project.imageUrl && <div className="docs-project-image"><img alt={`Capa do projeto ${project.title}`} src={project.imageUrl} /></div>}
-            <p>{project.description || 'Descricao do projeto ainda nao informada.'}</p>
-            {project.techs && <div className="docs-code-line"><span>stack</span><code>{project.techs}</code></div>}
-            {(project.liveUrl || project.repoUrl) && <div className="docs-project-actions">{project.liveUrl && <a href={project.liveUrl} rel="noreferrer" target="_blank">Abrir projeto <span>-&gt;</span></a>}{project.repoUrl && <a href={project.repoUrl} rel="noreferrer" target="_blank">Ver repositorio <span>-&gt;</span></a>}</div>}
-          </article>
-        )) : <div className="docs-empty-state"><strong>Nenhum projeto documentado</strong><p>Os cases publicados aparecerao nesta pagina.</p></div>}
-      </div>
-    </div>
-  )
-
-  const renderContact = () => (
-    <div className="docs-page">
-      <div className="docs-breadcrumb"><span>Conecte-se</span><b>/</b><strong>Contato</strong></div>
-      <header className="docs-page-header"><p className="docs-page-kicker">Canais oficiais</p><h1>Vamos conversar</h1><p>Escolha o canal mais adequado para falar sobre projetos, oportunidades ou colaboracoes.</p></header>
-      <div className="docs-contact-list">
-        {visibleContacts.length ? visibleContacts.map((contact) => <a href={contact.url} key={contact.id} rel="noreferrer" target="_blank"><ContactIcon type={contact.type} /><span><small>{contact.label || contact.type}</small><strong>{contact.value}</strong></span><b aria-hidden="true">-&gt;</b></a>) : <div className="docs-empty-state"><strong>Nenhum contato cadastrado</strong><p>Os canais oficiais aparecerao aqui.</p></div>}
-      </div>
-    </div>
-  )
-
-  const renderPage = () => {
-    if (activePage === 'overview') return renderOverview()
-    if (activePage === 'about') return renderAbout()
-    if (activePage === 'stack') return renderStack()
-    if (activePage === 'projects') return renderProjects()
-    if (activePage === 'contact') return renderContact()
-    const section = customSections.find((item) => `custom:${item.id}` === activePage)
-    return section ? <div className="docs-page docs-custom-page" style={sectionColorStyle(section)}><div className="docs-breadcrumb"><span>Mais</span><b>/</b><strong>{section.title}</strong></div><header className="docs-page-header"><p className="docs-page-kicker">Secao personalizada</p><h1>{section.title}</h1><p>{section.description || 'Esta pagina ainda nao possui conteudo.'}</p></header></div> : renderOverview()
-  }
-
-  const style = {
-    '--custom-accent': accentColor,
-    '--site-background': backgroundColor,
-    '--site-foreground': getContrastColor(backgroundColor),
-  } as CSSProperties
-
-  return (
-    <section className="docs-generated-site" style={style}>
-      <header className="docs-site-header">
-        <button aria-expanded={mobileMenuOpen} aria-label="Abrir navegacao" className="docs-mobile-menu" onClick={() => setMobileMenuOpen((current) => !current)} type="button"><span /><span /><span /></button>
-        <button className="docs-brand" onClick={() => openPage('overview')} type="button"><strong>{name || 'Portfolio'}</strong><span>Docs</span></button>
-        <div className="docs-header-context"><span>{activePageDefinition.group}</span><b>/</b><strong>{activePageDefinition.label}</strong></div>
-        <span className="docs-version">v1.0</span>
-      </header>
-
-      <div className="docs-site-layout">
-        <aside className={mobileMenuOpen ? 'docs-sidebar is-open' : 'docs-sidebar'}>
-          <div className="docs-sidebar-intro"><span>DOCUMENTATION</span><strong>{role || 'Developer portfolio'}</strong></div>
-          <nav aria-label="Paginas da documentacao">
-            {groups.map((group) => <div className="docs-nav-group" key={group}><p>{group}</p>{docsPages.filter((page) => page.group === group).map((page) => <button className={activePage === page.id ? 'is-active' : ''} key={page.id} onClick={() => openPage(page.id)} type="button"><span>{page.label}</span><b aria-hidden="true">{activePage === page.id ? '-' : ''}</b></button>)}</div>)}
-          </nav>
-          <footer><span className="is-online" />Portfolio atualizado</footer>
-        </aside>
-        {mobileMenuOpen && <button aria-label="Fechar navegacao" className="docs-sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} type="button" />}
-
-        <main className="docs-main-content" id="docs-page-top">{renderPage()}<footer className="docs-page-footer"><span>{name || 'Portfolio'}</span><button onClick={() => openPage('overview')} type="button">Voltar ao inicio</button></footer></main>
-
-        <aside className="docs-page-index"><p>Nesta pagina</p><a href="#docs-page-top">{activePageDefinition.label}</a>{activePage === 'about' && <a href="#docs-experience">Experiencia</a>}{activePage === 'projects' && visibleProjects.slice(0, 5).map((project, index) => <a href={`#docs-project-${index + 1}`} key={project.id}>{project.title}</a>)}<div><span>Ultima atualizacao</span><strong>Agora</strong></div></aside>
-      </div>
-    </section>
-  )
-}
 
 function DevPortfolioPreview({
   accentColor,
