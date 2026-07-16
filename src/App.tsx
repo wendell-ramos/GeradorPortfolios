@@ -1,5 +1,7 @@
-import { type ChangeEvent, useCallback, useMemo, useState } from 'react'
+import { type ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { Check, Eye, LogOut } from 'lucide-react'
 import './App.css'
+import './Builder.css'
 import type {
   BuilderStep,
   ContactLink,
@@ -16,7 +18,7 @@ import type {
 import { writePortfolioDraft } from './storage/portfolioDraft'
 import { usePortfolioDraftPersistence } from './hooks/usePortfolioDraftPersistence'
 import { moveById, terminalSlug } from './utils/portfolio'
-import { ProjectStartScreen } from './components/BuilderUI'
+import { PortfyBrand, ProjectStartScreen } from './components/BuilderUI'
 import { GeneratedDevSite } from './components/GeneratedDevSite'
 import { IdentityStep } from './steps/IdentityStep'
 import { ProjectsStep } from './steps/ProjectsStep'
@@ -226,6 +228,14 @@ function App() {
     contact: 'Preencha o identificador e o link de cada contato adicionado.',
     preview: '',
   }
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+    const frame = window.requestAnimationFrame(() => {
+      document.querySelector<HTMLElement>('.step-content')?.scrollTo({ top: 0, behavior: 'auto' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [step])
 
   function goNext() {
     if (builderFlowMode === 'guided' && !stepCompletion[step]) {
@@ -510,10 +520,7 @@ function App() {
   if (!draftReady) {
     return (
       <main className="draft-loading-screen">
-        <div className="product-mark">
-          <span>PF</span>
-          <div><strong>Portfy</strong><small>Carregando seu rascunho...</small></div>
-        </div>
+        <PortfyBrand subtitle="Preparando seu estudio..." />
       </main>
     )
   }
@@ -554,24 +561,25 @@ function App() {
   }
 
   return (
-    <main className="flow-shell">
+    <main className={`flow-shell flow-template-${template}`}>
       <header className="flow-header">
-        <div className="product-mark">
-          <span>PF</span>
+        <PortfyBrand subtitle="Creative portfolio studio" />
+        <div className="flow-progress" aria-label={`Etapa ${currentIndex + 1} de ${steps.length}`}>
           <div>
-            <strong>Portfy</strong>
-            <small>Portfolio para desenvolvedores</small>
+            <span>Seu portfolio</span>
+            <strong>{currentIndex + 1} de {steps.length}</strong>
           </div>
+          <i><span style={{ width: `${((currentIndex + 1) / steps.length) * 100}%` }} /></i>
         </div>
         <div className="flow-header-actions">
           <span className={`draft-status is-${draftStatus}`} aria-live="polite">
-            <i />
+            {draftStatus === 'saved' ? <Check aria-hidden="true" /> : <i />}
             {draftStatus === 'saving' ? 'Salvando...' : draftStatus === 'error' ? 'Falha ao salvar' : 'Rascunho salvo'}
           </span>
-          <button className="ghost-button" onClick={exitToStart} type="button">Sair</button>
+          <button className="ghost-button" onClick={exitToStart} type="button"><LogOut aria-hidden="true" />Sair</button>
           {(builderFlowMode === 'free' || maxUnlockedStep >= steps.length - 1) && (
             <button className="ghost-button" onClick={() => openUnlockedStep('preview', steps.length - 1)} type="button">
-              Visualizar portfolio
+              <Eye aria-hidden="true" />Visualizar portfolio
             </button>
           )}
         </div>

@@ -35,7 +35,7 @@ export function ProjectsStep({
     <TemplateEditorBanner template={template} />
     <div className="item-list">
       {projects.map((project, index) => (
-        <article className={`editable-item editable-item-${template}`} key={project.id}>
+        <article className={`editable-item project-editor editable-item-${template}`} key={project.id}>
           <div className="item-heading">
             <strong>Projeto {index + 1}</strong>
             <div className="inline-actions">
@@ -122,4 +122,3 @@ export function ProjectsStep({
   </StepBlock>
   )
 }
-

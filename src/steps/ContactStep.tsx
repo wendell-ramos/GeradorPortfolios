@@ -45,7 +45,7 @@ export function ContactStep({
 
     <div className="item-list">
       {contacts.map((contact) => (
-        <article className={`editable-item editable-item-${template}`} key={contact.id}>
+        <article className={`editable-item contact-editor editable-item-${template}`} key={contact.id}>
           <div className="item-heading">
             <strong className="contact-item-title">
               {template !== 'terminal' && <ContactIcon type={contact.type} />}
@@ -87,4 +87,3 @@ export function ContactStep({
   </StepBlock>
   )
 }
-
