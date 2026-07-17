@@ -12,7 +12,7 @@ interface ProjectsStepProps {
   removeProject: (id: string) => void
   removeProjectImage: (id: string) => void
   template: DevTemplate
-  updateProject: (id: string, field: keyof DevProject, value: string) => void
+  updateProject: (id: string, field: keyof DevProject, value: DevProject[keyof DevProject]) => void
 }
 
 export function ProjectsStep({
@@ -29,8 +29,8 @@ export function ProjectsStep({
   return (
   <StepBlock
     eyebrow="Etapa 4"
-    title={template === 'desktop' ? 'Preencha os projetos exibidos nas janelas.' : template === 'terminal' ? 'Cadastre as entradas de ~/projects.' : 'Documente seus projetos como cases.'}
-    description={template === 'terminal' ? 'O Terminal apresenta titulo, descricao, stack e links como texto. Imagens de capa nao sao usadas neste estilo.' : template === 'desktop' ? 'Cada projeto pode ter capa, link publicado, repositorio e tecnologias.' : 'Cada projeto vira um artigo tecnico com capa, contexto, stack e links.'}
+    title={template === 'desktop' ? 'Preencha os projetos exibidos nas janelas.' : template === 'terminal' ? 'Cadastre as entradas de ~/projects.' : template === 'landing' ? 'Escolha os cases que vao liderar a narrativa.' : 'Documente seus projetos como cases.'}
+    description={template === 'terminal' ? 'O Terminal apresenta titulo, descricao, stack e links como texto. Imagens de capa nao sao usadas neste estilo.' : template === 'desktop' ? 'Cada projeto pode ter capa, link publicado, repositorio e tecnologias.' : template === 'landing' ? 'Capas fortes, contexto direto e links transformam cada projeto em um destaque visual.' : 'Cada projeto vira um artigo tecnico com capa, contexto, stack e links.'}
   >
     <TemplateEditorBanner template={template} />
     <div className="item-list">
@@ -63,6 +63,32 @@ export function ProjectsStep({
             rows={3}
             value={project.description}
           />
+          {template === 'landing' && (
+            <div className="landing-project-details">
+              <TextInput
+                label="Categoria"
+                onChange={(value) => updateProject(project.id, 'category', value)}
+                placeholder="Ex.: Sistemas web"
+                value={project.category}
+              />
+              <TextInput
+                label="Status"
+                onChange={(value) => updateProject(project.id, 'status', value)}
+                placeholder="Ex.: Publicado"
+                value={project.status}
+              />
+              <TextInput
+                label="Ano"
+                onChange={(value) => updateProject(project.id, 'year', value)}
+                placeholder="2026"
+                value={project.year}
+              />
+              <label className="template-toggle-field landing-featured-toggle">
+                <input checked={project.featured} onChange={(event) => updateProject(project.id, 'featured', event.target.checked)} type="checkbox" />
+                <span><strong>Projeto destaque</strong><small>Aparece primeiro e recebe maior enfase visual.</small></span>
+              </label>
+            </div>
+          )}
           {template !== 'terminal' && <div className="project-image-field">
             <div className="project-image-copy">
               <strong>Imagem de capa</strong>

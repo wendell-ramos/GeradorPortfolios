@@ -55,8 +55,8 @@ export function SectionsStep({
   return (
   <StepBlock
     eyebrow="Etapa 3"
-    title={template === 'desktop' ? 'Monte os atalhos e janelas do Desktop.' : template === 'terminal' ? 'Defina os comandos do Terminal.' : 'Organize as paginas da documentacao.'}
-    description={template === 'desktop' ? 'Cada secao vira um atalho com icone e uma janela propria.' : template === 'terminal' ? 'Cada secao vira um comando textual. Icones e controles visuais nao fazem parte deste estilo.' : 'Cada secao vira uma pagina agrupada na navegacao lateral do Docs.'}
+    title={template === 'desktop' ? 'Monte os atalhos e janelas do Desktop.' : template === 'terminal' ? 'Defina os comandos do Terminal.' : template === 'landing' ? 'Construa o ritmo da Landing.' : 'Organize as paginas da documentacao.'}
+    description={template === 'desktop' ? 'Cada secao vira um atalho com icone e uma janela propria.' : template === 'terminal' ? 'Cada secao vira um comando textual. Icones e controles visuais nao fazem parte deste estilo.' : template === 'landing' ? 'A ordem das secoes define a narrativa vertical que o visitante percorre.' : 'Cada secao vira uma pagina agrupada na navegacao lateral do Docs.'}
   >
     <TemplateEditorBanner template={template} />
     <div className={`preset-section-grid preset-section-${template}`}>
@@ -65,6 +65,7 @@ export function SectionsStep({
           {template === 'desktop' && <SectionIconGlyph icon={section.icon} />}
           {template === 'terminal' && <code>./{terminalSlug(section.title)}</code>}
           {template === 'docs' && <small>Nova pagina</small>}
+          {template === 'landing' && <small>Nova secao</small>}
           <strong>{section.title}</strong>
           <span>{section.description}</span>
         </button>
@@ -78,6 +79,7 @@ export function SectionsStep({
             {template === 'desktop' && <SectionIconGlyph icon={section.icon} />}
             {template === 'terminal' && <code className="section-terminal-command">$ {section.terminalCommand || terminalSlug(section.title)}</code>}
             {template === 'docs' && <span className="section-docs-page">PAGE</span>}
+            {template === 'landing' && <span className="section-landing-index">{String(index + 1).padStart(2, '0')}</span>}
             <div>
               <strong>{section.title}</strong>
               <p>{section.description}</p>
@@ -161,6 +163,7 @@ export function SectionsStep({
       )}
       {template === 'terminal' && <p className="template-form-hint"><code>./{terminalSlug(customSectionTitle) || 'novo-comando'}</code> sera criado a partir do nome da secao.</p>}
       {template === 'docs' && <p className="template-form-hint">A nova pagina sera adicionada inicialmente ao grupo <strong>Mais</strong>.</p>}
+      {template === 'landing' && <p className="template-form-hint">A nova secao entra no final da narrativa e pode ser reordenada acima.</p>}
       <button className="primary-button" onClick={addCustomSection} type="button">
         Adicionar secao
       </button>
@@ -171,4 +174,3 @@ export function SectionsStep({
   </StepBlock>
   )
 }
-

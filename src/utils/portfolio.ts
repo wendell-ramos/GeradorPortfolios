@@ -13,7 +13,7 @@ export function moveById<T extends { id: string }>(items: T[], id: string, direc
 }
 
 export function defaultSectionSurface(template: DevTemplate) {
-  return template === 'docs' ? '#ffffff' : template === 'terminal' ? '#071426' : '#f8fafc'
+  return template === 'docs' ? '#ffffff' : template === 'terminal' ? '#071426' : template === 'landing' ? '#f4f1ea' : '#f8fafc'
 }
 
 export function getContrastColor(color: string) {

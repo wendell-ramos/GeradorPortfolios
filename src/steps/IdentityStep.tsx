@@ -1,5 +1,5 @@
 import { useEffect, useId, useState, type ChangeEvent } from 'react'
-import { BriefcaseBusiness, CalendarRange, ChevronDown, ChevronUp, ImagePlus, Plus, Trash2 } from 'lucide-react'
+import { BriefcaseBusiness, CalendarRange, ChevronDown, ChevronUp, FileText, ImagePlus, Plus, Trash2 } from 'lucide-react'
 import type { DevExperience } from '../models/portfolio'
 import { FormSection, StepBlock, TextArea, TextInput } from '../components/BuilderUI'
 import { IdentityMiniPreview } from '../components/PortfolioPreviews'
@@ -9,13 +9,19 @@ interface IdentityStepProps {
   bio: string
   experiences: DevExperience[]
   handleProfilePhoto: (event: ChangeEvent<HTMLInputElement>) => void
+  handleResumeFile: (event: ChangeEvent<HTMLInputElement>) => void
   headline: string
   location: string
   moveExperience: (id: string, direction: -1 | 1) => void
   name: string
   profilePhoto: string
   profilePhotoError: string
+  removeResumeFile: () => void
   removeExperience: (id: string) => void
+  resumeEnabled: boolean
+  resumeFile: string
+  resumeFileError: string
+  resumeName: string
   role: string
   setBio: (value: string) => void
   setHeadline: (value: string) => void
@@ -23,6 +29,7 @@ interface IdentityStepProps {
   setName: (value: string) => void
   setProfilePhoto: (value: string) => void
   setProfilePhotoError: (value: string) => void
+  setResumeEnabled: (value: boolean) => void
   setRole: (value: string) => void
   updateExperience: (id: string, field: keyof Omit<DevExperience, 'id'>, value: string | boolean) => void
 }
@@ -101,13 +108,19 @@ export function IdentityStep({
   bio,
   experiences,
   handleProfilePhoto,
+  handleResumeFile,
   headline,
   location,
   moveExperience,
   name,
   profilePhoto,
   profilePhotoError,
+  removeResumeFile,
   removeExperience,
+  resumeEnabled,
+  resumeFile,
+  resumeFileError,
+  resumeName,
   role,
   setBio,
   setHeadline,
@@ -115,6 +128,7 @@ export function IdentityStep({
   setName,
   setProfilePhoto,
   setProfilePhotoError,
+  setResumeEnabled,
   setRole,
   updateExperience,
 }: IdentityStepProps) {
@@ -157,6 +171,46 @@ export function IdentityStep({
           </div>
         </div>
         {profilePhotoError && <p className="profile-photo-error" role="alert">{profilePhotoError}</p>}
+      </div>
+      <div className={`${resumeEnabled ? 'is-enabled' : 'is-disabled'} ${resumeFile ? 'has-file' : ''} resume-file-field`}>
+        <label className="resume-enable-row">
+          <input checked={resumeEnabled} onChange={(event) => setResumeEnabled(event.target.checked)} type="checkbox" />
+          <span className="resume-enable-switch" aria-hidden="true"><i /></span>
+          <span>
+            <strong>Exibir curriculo no portfolio</strong>
+            <small>Opcional. Ative para adicionar uma secao ou acesso ao seu PDF.</small>
+          </span>
+          <b>{resumeEnabled ? 'Ativado' : 'Desativado'}</b>
+        </label>
+        {resumeEnabled ? (
+          <>
+            <div className="resume-file-copy">
+              <span className="resume-file-icon"><FileText aria-hidden="true" /></span>
+              <div>
+                <strong>Curriculo em PDF</strong>
+                <span>Adicione um arquivo de ate 10 MB. Ele aparecera de forma adaptada em todos os estilos.</span>
+              </div>
+            </div>
+            <div className="resume-file-status">
+              <FileText aria-hidden="true" />
+              <span><small>{resumeFile ? 'Arquivo selecionado' : 'Arquivo pendente'}</small><strong>{resumeName || 'Adicione um PDF para publicar'}</strong></span>
+            </div>
+            <div className="resume-file-actions">
+              <label className="resume-file-button">
+                {resumeFile ? 'Trocar PDF' : 'Adicionar PDF'}
+                <input accept="application/pdf,.pdf" onChange={handleResumeFile} type="file" />
+              </label>
+              {resumeFile && <a href={resumeFile} rel="noreferrer" target="_blank">Visualizar</a>}
+              {resumeFile && <button aria-label="Remover curriculo" onClick={removeResumeFile} type="button"><Trash2 aria-hidden="true" /></button>}
+            </div>
+            {resumeFileError && <p className="resume-file-error" role="alert">{resumeFileError}</p>}
+          </>
+        ) : (
+          <div className="resume-disabled-note">
+            <FileText aria-hidden="true" />
+            <span><strong>Curriculo oculto</strong><small>Nenhum botao, comando ou secao de curriculo sera gerado.</small></span>
+          </div>
+        )}
       </div>
     </FormSection>
     <div className="experience-builder">
@@ -211,7 +265,7 @@ export function IdentityStep({
         ))}
       </div>
     </div>
-    <IdentityMiniPreview headline={headline} name={name} profilePhoto={profilePhoto} role={role} />
+    <IdentityMiniPreview headline={headline} name={name} profilePhoto={profilePhoto} resumeName={resumeEnabled ? resumeName : ''} role={role} />
   </StepBlock>
   )
 }

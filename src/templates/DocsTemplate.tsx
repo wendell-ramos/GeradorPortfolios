@@ -14,6 +14,9 @@ export function DocsGeneratedSite({
   name,
   profilePhoto,
   projects,
+  resumeEnabled,
+  resumeFile,
+  resumeName,
   role,
   sections,
   stack,
@@ -57,6 +60,7 @@ export function DocsGeneratedSite({
             {location && <span>Baseado em {location}</span>}
             <span className="is-available">Disponivel para conexoes</span>
           </div>
+          {resumeEnabled && resumeFile && <a className="docs-resume-link" href={resumeFile} rel="noreferrer" target="_blank"><span>PDF</span> Abrir curriculo <small>{resumeName}</small><b aria-hidden="true">-&gt;</b></a>}
         </div>
         {profilePhoto && <img alt={`Foto de ${name}`} src={profilePhoto} />}
       </section>

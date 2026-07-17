@@ -114,15 +114,15 @@ export function StyleStep({
         style={{ backgroundColor: templateBackgrounds[template], color: getContrastColor(templateBackgrounds[template]) }}
       >
         <span>Fundo</span>
-        <strong>{template === 'desktop' ? 'Area de trabalho' : template === 'terminal' ? 'Terminal' : 'Pagina'}</strong>
+        <strong>{template === 'desktop' ? 'Area de trabalho' : template === 'terminal' ? 'Terminal' : template === 'landing' ? 'Landing page' : 'Pagina'}</strong>
         <i style={{ backgroundColor: accentColor }} />
       </div>
     </div>
     <div className={`template-settings-panel template-settings-${template}`}>
       <div className="template-settings-heading">
         <div>
-          <strong>{template === 'desktop' ? 'Interface do sistema' : template === 'terminal' ? 'Ambiente do terminal' : 'Leitura da documentacao'}</strong>
-          <span>{template === 'desktop' ? 'Personalize rotulos, atalhos e a janela da interface retro.' : template === 'terminal' ? 'Defina a identidade, a escala e o acabamento visual da sessao.' : 'Ajuste a identidade e a composicao de leitura do portfolio.'}</span>
+          <strong>{template === 'desktop' ? 'Interface do sistema' : template === 'terminal' ? 'Ambiente do terminal' : template === 'landing' ? 'Direcao criativa' : 'Leitura da documentacao'}</strong>
+          <span>{template === 'desktop' ? 'Personalize rotulos, atalhos e a janela da interface retro.' : template === 'terminal' ? 'Defina a identidade, a escala e o acabamento visual da sessao.' : template === 'landing' ? 'Ajuste narrativa, movimento e composicao dos projetos.' : 'Ajuste a identidade e a composicao de leitura do portfolio.'}</span>
         </div>
         <button
           disabled={JSON.stringify(templateSettings[template]) === JSON.stringify(defaultTemplateSettings[template])}
@@ -164,9 +164,38 @@ export function StyleStep({
           <div className={`template-setting-preview docs-setting-preview docs-preview-${templateSettings.docs.contentWidth}`}><span>{templateSettings.docs.sidebarLabel || 'DOCUMENTATION'}</span><strong>Portfolio <b>{templateSettings.docs.badge || 'Docs'}</b></strong><small>{templateSettings.docs.version || 'v1.0'}{templateSettings.docs.showPageIndex ? ' / indice ativo' : ''}</small></div>
         </div>
       )}
+
+      {template === 'landing' && (
+        <div className="template-settings-fields">
+          <label className="template-option-field"><span>Composicao principal</span><select onChange={(event) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, composition: event.target.value as TemplateSettings['landing']['composition'] } }))} value={templateSettings.landing.composition}><option value="editorial">Editorial com metricas</option><option value="profile">Pessoal com foto</option><option value="projects">Projetos primeiro</option></select></label>
+          <TextInput label="Chamada acima do hero" onChange={(value) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, eyebrow: value } }))} placeholder="Disponivel para novos projetos" value={templateSettings.landing.eyebrow} />
+          <TextInput label="Texto do CTA principal" onChange={(value) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, primaryAction: value } }))} placeholder="Explorar projetos" value={templateSettings.landing.primaryAction} />
+          <TextInput label="Trecho destacado no titulo" onChange={(value) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, highlight: value } }))} placeholder="Ex.: problema real" value={templateSettings.landing.highlight} />
+          <label className="template-option-field"><span>Composicao dos projetos</span><select onChange={(event) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, projectLayout: event.target.value as TemplateSettings['landing']['projectLayout'] } }))} value={templateSettings.landing.projectLayout}><option value="showcase">Showcase alternado</option><option value="grid">Grade editorial</option></select></label>
+          <label className="template-option-field"><span>Intensidade do movimento</span><select onChange={(event) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, motion: event.target.value as TemplateSettings['landing']['motion'] } }))} value={templateSettings.landing.motion}><option value="subtle">Sutil</option><option value="expressive">Expressiva</option></select></label>
+          <label className="template-toggle-field"><input checked={templateSettings.landing.showMarquee} onChange={(event) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, showMarquee: event.target.checked } }))} type="checkbox" /><span><strong>Faixa de tecnologias</strong><small>Stack em movimento entre o hero e o conteudo.</small></span></label>
+          <label className="template-toggle-field"><input checked={templateSettings.landing.showMetrics} onChange={(event) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, showMetrics: event.target.checked } }))} type="checkbox" /><span><strong>Metricas no hero</strong><small>Numeros rapidos para reforcar experiencia e resultados.</small></span></label>
+          {templateSettings.landing.showMetrics && (
+            <div className="landing-metrics-fields">
+              <div className="landing-metric-pair">
+                <TextInput label="Metrica 1" onChange={(value) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, metricOneValue: value } }))} placeholder="4+" value={templateSettings.landing.metricOneValue} />
+                <TextInput label="Descricao" onChange={(value) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, metricOneLabel: value } }))} placeholder="projetos publicados" value={templateSettings.landing.metricOneLabel} />
+              </div>
+              <div className="landing-metric-pair">
+                <TextInput label="Metrica 2" onChange={(value) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, metricTwoValue: value } }))} placeholder="2" value={templateSettings.landing.metricTwoValue} />
+                <TextInput label="Descricao" onChange={(value) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, metricTwoLabel: value } }))} placeholder="clientes atendidos" value={templateSettings.landing.metricTwoLabel} />
+              </div>
+              <div className="landing-metric-pair">
+                <TextInput label="Metrica 3" onChange={(value) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, metricThreeValue: value } }))} placeholder="BR" value={templateSettings.landing.metricThreeValue} />
+                <TextInput label="Descricao" onChange={(value) => setTemplateSettings((current) => ({ ...current, landing: { ...current.landing, metricThreeLabel: value } }))} placeholder="Presidente Prudente, SP" value={templateSettings.landing.metricThreeLabel} />
+              </div>
+            </div>
+          )}
+          <div className={`template-setting-preview landing-setting-preview landing-preview-${templateSettings.landing.composition}`}><span>{templateSettings.landing.eyebrow || 'Disponivel'}</span><strong>{templateSettings.landing.composition === 'profile' ? 'PESSOAL' : templateSettings.landing.composition === 'projects' ? 'PROJECTS' : 'EDITORIAL'} <b>PORTFOLIO</b></strong><small>{templateSettings.landing.primaryAction || 'Explorar projetos'} / movimento {templateSettings.landing.motion}</small></div>
+        </div>
+      )}
     </div>
 
   </StepBlock>
   )
 }
-

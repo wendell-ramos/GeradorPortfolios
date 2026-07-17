@@ -15,6 +15,9 @@ export function DesktopGeneratedSite({
   location,
   name,
   profilePhoto,
+  resumeEnabled,
+  resumeFile,
+  resumeName,
   projects,
   role,
   sections,
@@ -132,6 +135,21 @@ export function DesktopGeneratedSite({
       )
     }
 
+    if (activeSection === 'resume') {
+      return (
+        <div className="desktop-copy-content desktop-resume-content">
+          <p className="desktop-window-kicker">Documento profissional</p>
+          <h2>Curriculo</h2>
+          <p>Consulte minha formacao, experiencia e principais qualificacoes no documento completo.</p>
+          <div className="desktop-resume-file">
+            <span aria-hidden="true">PDF</span>
+            <div><strong>{resumeName || 'Curriculo.pdf'}</strong><small>Documento pronto para visualizacao</small></div>
+            <a href={resumeFile} rel="noreferrer" target="_blank">Abrir PDF</a>
+          </div>
+        </div>
+      )
+    }
+
     if (activeSection === 'about') {
       return (
         <div className="desktop-copy-content desktop-about-content">
@@ -244,18 +262,29 @@ export function DesktopGeneratedSite({
     )
   }
 
-  const desktopItems = [
-    { id: 'home', title: 'Bem-vindo', icon: 'home' as SectionIcon },
-    ...sections.map(({ icon, id, title }) => ({
+  const desktopSectionItems = sections.map(({ icon, id, title }) => ({
       id,
       icon,
       title: id === 'about' ? 'Sobre mim' : id === 'projects' ? 'Meus projetos' : id === 'stack' ? 'Habilidades' : title,
-    })),
+    }))
+  if (resumeEnabled && resumeFile) {
+    const aboutIndex = desktopSectionItems.findIndex((item) => item.id === 'about')
+    desktopSectionItems.splice(aboutIndex >= 0 ? aboutIndex + 1 : 0, 0, { id: 'resume', title: 'Curriculo', icon: 'document' })
+  }
+  const desktopItems = [
+    { id: 'home', title: 'Bem-vindo', icon: 'home' as SectionIcon },
+    ...desktopSectionItems,
   ]
-  const windowTitle = activeSection === 'home' ? templateSettings.desktop.homeTitle || 'Portfolio' : activeDefinition?.title ?? 'Portfolio'
+  const windowTitle = activeSection === 'home'
+    ? templateSettings.desktop.homeTitle || 'Portfolio'
+    : activeSection === 'resume'
+      ? 'Curriculo'
+      : activeDefinition?.title ?? 'Portfolio'
   const statusText = activeSection === 'projects'
     ? `${visibleProjects.length} projetos encontrados`
-    : `${desktopItems.length - 1} atalhos disponiveis`
+    : activeSection === 'resume'
+      ? 'Documento PDF disponivel'
+      : `${desktopItems.length - 1} atalhos disponiveis`
 
   if (booting) {
     return (

@@ -13,6 +13,7 @@ import { ContactIcon } from './PortfolioIcons'
 import { DesktopGeneratedSite } from '../templates/DesktopTemplate'
 import { TerminalGeneratedSite } from '../templates/TerminalTemplate'
 import { DocsGeneratedSite } from '../templates/DocsTemplate'
+import { LandingGeneratedSite } from '../templates/LandingTemplate'
 
 export function GeneratedDevSite({
   onBackgroundColorChange,
@@ -44,6 +45,8 @@ export function GeneratedDevSite({
         <TerminalGeneratedSite {...props} />
       ) : props.template === 'docs' ? (
         <DocsGeneratedSite {...props} />
+      ) : props.template === 'landing' ? (
+        <LandingGeneratedSite {...props} />
       ) : <DevPortfolioPreview {...props} standalone />}
     </main>
   )
@@ -292,4 +295,3 @@ function DevHeroVisual({
     </div>
   )
 }
-

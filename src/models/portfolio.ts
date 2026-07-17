@@ -1,5 +1,6 @@
 export type BuilderStep = 'identity' | 'style' | 'sections' | 'projects' | 'contact' | 'preview'
-export type DevTemplate = 'desktop' | 'terminal' | 'docs'
+export type DevTemplate = 'desktop' | 'terminal' | 'docs' | 'landing'
+export type LandingComposition = 'editorial' | 'profile' | 'projects'
 export type DesktopColorTarget = 'titlebar' | 'menu' | 'window' | 'statusbar' | 'taskbar'
 export type DesktopEditableTarget = 'background' | DesktopColorTarget
 export type DefaultSection = 'about' | 'stack' | 'projects' | 'contact'
@@ -17,7 +18,20 @@ export type PortfolioSection = {
   locked?: boolean
 }
 
-export type DevProject = { id: string; title: string; description: string; imageUrl: string; imageName: string; liveUrl: string; repoUrl: string; techs: string }
+export type DevProject = {
+  id: string
+  title: string
+  description: string
+  imageUrl: string
+  imageName: string
+  liveUrl: string
+  repoUrl: string
+  techs: string
+  category: string
+  status: string
+  year: string
+  featured: boolean
+}
 export type DevExperience = { id: string; company: string; city: string; role: string; activities: string; startDate: string; endDate: string; current: boolean }
 export type ContactType = 'email' | 'github' | 'linkedin' | 'whatsapp' | 'instagram' | 'x' | 'portfolio'
 export type ContactLink = { id: string; type: ContactType; label: string; value: string; url: string }
@@ -27,6 +41,23 @@ export type TemplateSettings = {
   desktop: { homeTitle: string; startLabel: string; shortcutSize: 'small' | 'medium' | 'large'; windowWidth: 'compact' | 'wide' }
   terminal: { bootTitle: string; host: string; shell: string; textScale: 'small' | 'medium' | 'large'; scanlines: boolean }
   docs: { badge: string; sidebarLabel: string; version: string; contentWidth: 'focused' | 'wide'; showPageIndex: boolean }
+  landing: {
+    composition: LandingComposition
+    eyebrow: string
+    primaryAction: string
+    highlight: string
+    resumeUrl: string
+    projectLayout: 'grid' | 'showcase'
+    motion: 'subtle' | 'expressive'
+    showMarquee: boolean
+    showMetrics: boolean
+    metricOneValue: string
+    metricOneLabel: string
+    metricTwoValue: string
+    metricTwoLabel: string
+    metricThreeValue: string
+    metricThreeLabel: string
+  }
 }
 
 export type PortfolioDraft = {
@@ -45,6 +76,9 @@ export type PortfolioDraft = {
   headline: string
   bio: string
   profilePhoto: string
+  resumeEnabled: boolean
+  resumeFile: string
+  resumeName: string
   experiences: DevExperience[]
   stackText: string
   sections: PortfolioSection[]
@@ -63,6 +97,9 @@ export type PortfolioPreviewProps = {
   location: string
   name: string
   profilePhoto: string
+  resumeEnabled: boolean
+  resumeFile: string
+  resumeName: string
   projects: DevProject[]
   role: string
   sections: PortfolioSection[]

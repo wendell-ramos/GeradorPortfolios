@@ -12,6 +12,9 @@ export function TerminalGeneratedSite({
   location,
   name,
   projects,
+  resumeEnabled,
+  resumeFile,
+  resumeName,
   role,
   sections,
   stack,
@@ -34,6 +37,7 @@ export function TerminalGeneratedSite({
     ...(hasSection('stack') ? [{ id: 'stack', label: sectionCommand('stack', 'stack'), aliases: [sectionCommand('stack', 'stack'), 'stack', 'skills', 'habilidades', 'tecnologias'] }] : []),
     ...(hasSection('projects') ? [{ id: 'projects', label: sectionCommand('projects', 'projects'), aliases: [sectionCommand('projects', 'projects'), 'projects', 'projetos', 'ls-projects'] }] : []),
     ...(visibleExperiences.length ? [{ id: 'experience', label: 'experience', aliases: ['experience', 'experiences', 'experiencia', 'experiencias', 'work'] }] : []),
+    ...(resumeEnabled && resumeFile ? [{ id: 'resume', label: 'resume', aliases: ['resume', 'cv', 'curriculo'] }] : []),
     ...(hasSection('contact') ? [{ id: 'contact', label: sectionCommand('contact', 'contact'), aliases: [sectionCommand('contact', 'contact'), 'contact', 'contato', 'contacts'] }] : []),
     ...customSections.map((section) => {
       const slug = section.terminalCommand || terminalSlug(section.title) || `section-${section.id}`
@@ -97,7 +101,7 @@ export function TerminalGeneratedSite({
             {commands.filter((command) => command.id !== 'help').map((command) => (
               <div key={command.id}>
                 <dt>{command.label}</dt>
-                <dd>{command.id === 'whoami' ? 'identidade e resumo profissional' : command.id === 'stack' ? 'tecnologias e ferramentas' : command.id === 'projects' ? 'projetos publicados e repositorios' : command.id === 'experience' ? 'historico profissional' : command.id === 'contact' ? 'canais para contato' : 'arquivo de secao personalizada'}</dd>
+                <dd>{command.id === 'whoami' ? 'identidade e resumo profissional' : command.id === 'stack' ? 'tecnologias e ferramentas' : command.id === 'projects' ? 'projetos publicados e repositorios' : command.id === 'experience' ? 'historico profissional' : command.id === 'resume' ? 'abre o curriculo em PDF' : command.id === 'contact' ? 'canais para contato' : 'arquivo de secao personalizada'}</dd>
               </div>
             ))}
             <div><dt>clear</dt><dd>limpa a tela do terminal</dd></div>
@@ -166,6 +170,15 @@ export function TerminalGeneratedSite({
               {experience.activities && <p>{experience.activities}</p>}
             </article>
           ))}
+        </div>
+      )
+    }
+
+    if (activeCommand === 'resume') {
+      return (
+        <div className="terminal-resume-output">
+          <p>Arquivo encontrado em ~/documents/{resumeName || 'curriculo.pdf'}</p>
+          <a href={resumeFile} rel="noreferrer" target="_blank">[abrir curriculo.pdf]</a>
         </div>
       )
     }

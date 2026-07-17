@@ -56,6 +56,10 @@ function App() {
   const [bio, setBio] = useState(initialPreset.bio)
   const [profilePhoto, setProfilePhoto] = useState(initialPreset.profilePhoto)
   const [profilePhotoError, setProfilePhotoError] = useState('')
+  const [resumeEnabled, setResumeEnabled] = useState(initialPreset.resumeEnabled)
+  const [resumeFile, setResumeFile] = useState(initialPreset.resumeFile)
+  const [resumeName, setResumeName] = useState(initialPreset.resumeName)
+  const [resumeFileError, setResumeFileError] = useState('')
   const [projectImageErrors, setProjectImageErrors] = useState<Record<string, string>>({})
   const [experiences, setExperiences] = useState<DevExperience[]>(initialPreset.experiences)
 
@@ -84,6 +88,39 @@ function App() {
     }
     reader.onerror = () => setProfilePhotoError('Nao foi possivel carregar essa imagem.')
     reader.readAsDataURL(file)
+  }
+
+  function handleResumeFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+
+    if (!file) return
+
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      setResumeFileError('Escolha um arquivo PDF.')
+      return
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setResumeFileError('O curriculo deve ter no maximo 10 MB.')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') return
+      setResumeFile(reader.result)
+      setResumeName(file.name)
+      setResumeFileError('')
+    }
+    reader.onerror = () => setResumeFileError('Nao foi possivel carregar esse PDF.')
+    reader.readAsDataURL(file)
+  }
+
+  function removeResumeFile() {
+    setResumeFile('')
+    setResumeName('')
+    setResumeFileError('')
   }
 
   function addExperience() {
@@ -130,6 +167,8 @@ function App() {
   const [contacts, setContacts] = useState<ContactLink[]>(initialPreset.contacts)
 
   const restoreDraft = useCallback((draft: PortfolioDraft) => {
+    const savedTemplateSettings = draft.templateSettings ?? defaultTemplateSettings
+
     setStep(draft.step)
     setMaxUnlockedStep(draft.maxUnlockedStep)
     setTemplate(draft.template)
@@ -137,9 +176,10 @@ function App() {
     setTemplateBackgrounds({ ...defaultTemplateBackgrounds, ...draft.templateBackgrounds })
     setDesktopAreaColors({ ...defaultDesktopAreaColors, ...draft.desktopAreaColors })
     setTemplateSettings({
-      desktop: { ...defaultTemplateSettings.desktop, ...draft.templateSettings.desktop },
-      terminal: { ...defaultTemplateSettings.terminal, ...draft.templateSettings.terminal },
-      docs: { ...defaultTemplateSettings.docs, ...draft.templateSettings.docs },
+      desktop: { ...defaultTemplateSettings.desktop, ...savedTemplateSettings.desktop },
+      terminal: { ...defaultTemplateSettings.terminal, ...savedTemplateSettings.terminal },
+      docs: { ...defaultTemplateSettings.docs, ...savedTemplateSettings.docs },
+      landing: { ...defaultTemplateSettings.landing, ...savedTemplateSettings.landing },
     })
     setName(draft.name)
     setRole(draft.role)
@@ -147,10 +187,20 @@ function App() {
     setHeadline(draft.headline)
     setBio(draft.bio)
     setProfilePhoto(draft.profilePhoto)
+    setResumeEnabled(draft.resumeEnabled ?? Boolean(draft.resumeFile))
+    setResumeFile(draft.resumeFile ?? '')
+    setResumeName(draft.resumeName ?? '')
+    setResumeFileError('')
     setExperiences(draft.experiences)
     setStackText(draft.stackText)
     setSections(draft.sections)
-    setProjects(draft.projects)
+    setProjects((draft.projects ?? []).map((project, index) => ({
+      ...project,
+      category: project.category ?? 'Projeto',
+      status: project.status ?? 'Concluido',
+      year: project.year ?? '',
+      featured: project.featured ?? index === 0,
+    })))
     setContacts(draft.contacts)
     setSetupComplete(true)
   }, [])
@@ -172,13 +222,16 @@ function App() {
       headline,
       bio,
       profilePhoto,
+      resumeEnabled,
+      resumeFile,
+      resumeName,
       experiences,
       stackText,
       sections,
       projects,
       contacts,
     }
-  ), [accentColor, bio, contacts, desktopAreaColors, experiences, headline, location, maxUnlockedStep, name, profilePhoto, projects, role, sections, stackText, step, template, templateBackgrounds, templateSettings])
+  ), [accentColor, bio, contacts, desktopAreaColors, experiences, headline, location, maxUnlockedStep, name, profilePhoto, projects, resumeEnabled, resumeFile, resumeName, role, sections, stackText, step, template, templateBackgrounds, templateSettings])
 
   const { draftReady, draftStatus, setDraftStatus } = usePortfolioDraftPersistence({
     currentDraft,
@@ -335,7 +388,15 @@ function App() {
     )))
   }
 
-  function updateProject(projectId: string, field: keyof DevProject, value: string) {
+  function updateProject(projectId: string, field: keyof DevProject, value: DevProject[keyof DevProject]) {
+    if (field === 'featured' && value === true) {
+      setProjects((current) => current.map((project) => ({
+        ...project,
+        featured: project.id === projectId,
+      })))
+      return
+    }
+
     setProjects((current) =>
       current.map((project) => (project.id === projectId ? { ...project, [field]: value } : project)),
     )
@@ -394,6 +455,10 @@ function App() {
         liveUrl: '',
         repoUrl: '',
         techs: '',
+        category: '',
+        status: '',
+        year: '',
+        featured: false,
       },
     ])
   }
@@ -475,6 +540,10 @@ function App() {
     setBio('')
     setProfilePhoto('')
     setProfilePhotoError('')
+    setResumeEnabled(false)
+    setResumeFile('')
+    setResumeName('')
+    setResumeFileError('')
     setProjectImageErrors({})
     setExperiences([])
     setStackText('')
@@ -505,6 +574,10 @@ function App() {
     setBio(preset.bio)
     setProfilePhoto(preset.profilePhoto)
     setProfilePhotoError('')
+    setResumeEnabled(preset.resumeEnabled)
+    setResumeFile(preset.resumeFile)
+    setResumeName(preset.resumeName)
+    setResumeFileError('')
     setProjectImageErrors({})
     setExperiences(preset.experiences)
     setStackText(preset.stackText)
@@ -550,6 +623,9 @@ function App() {
         onDesktopAreaColorChange={(target, color) => setDesktopAreaColors((current) => ({ ...current, [target]: color }))}
         onExit={() => setSiteMode(false)}
         profilePhoto={profilePhoto}
+        resumeEnabled={resumeEnabled}
+        resumeFile={resumeFile}
+        resumeName={resumeName}
         projects={projects}
         role={role}
         sections={enabledSections}
@@ -608,12 +684,18 @@ function App() {
             bio={bio}
             experiences={experiences}
             handleProfilePhoto={handleProfilePhoto}
+            handleResumeFile={handleResumeFile}
             headline={headline}
             location={location}
             moveExperience={moveExperience}
             name={name}
             profilePhoto={profilePhoto}
             profilePhotoError={profilePhotoError}
+            removeResumeFile={removeResumeFile}
+            resumeEnabled={resumeEnabled}
+            resumeFile={resumeFile}
+            resumeFileError={resumeFileError}
+            resumeName={resumeName}
             removeExperience={removeExperience}
             role={role}
             setBio={setBio}
@@ -622,6 +704,7 @@ function App() {
             setName={setName}
             setProfilePhoto={setProfilePhoto}
             setProfilePhotoError={setProfilePhotoError}
+            setResumeEnabled={setResumeEnabled}
             setRole={setRole}
             updateExperience={updateExperience}
           />

@@ -24,8 +24,8 @@ export function ContactStep({
   return (
   <StepBlock
     eyebrow="Etapa 5"
-    title={template === 'desktop' ? 'Adicione contatos com atalhos visuais.' : template === 'terminal' ? 'Configure a saida do comando contact.' : 'Organize os canais da pagina Contato.'}
-    description={template === 'terminal' ? 'As redes aparecem como linhas de texto clicaveis, sem icones.' : template === 'desktop' ? 'Escolha redes predefinidas com seus icones e edite texto e URL.' : 'Cada canal aparece como uma referencia organizada com icone e link.'}
+    title={template === 'desktop' ? 'Adicione contatos com atalhos visuais.' : template === 'terminal' ? 'Configure a saida do comando contact.' : template === 'landing' ? 'Feche a pagina com um convite claro.' : 'Organize os canais da pagina Contato.'}
+    description={template === 'terminal' ? 'As redes aparecem como linhas de texto clicaveis, sem icones.' : template === 'desktop' ? 'Escolha redes predefinidas com seus icones e edite texto e URL.' : template === 'landing' ? 'Os canais aparecem como links grandes e interativos no encerramento da landing page.' : 'Cada canal aparece como uma referencia organizada com icone e link.'}
   >
     <TemplateEditorBanner template={template} />
     <div className={`preset-contact-grid preset-contact-${template}`}>

@@ -7,11 +7,13 @@ export function IdentityMiniPreview({
   headline,
   name,
   profilePhoto,
+  resumeName,
   role,
 }: {
   headline: string
   name: string
   profilePhoto: string
+  resumeName: string
   role: string
 }) {
   return (
@@ -25,6 +27,7 @@ export function IdentityMiniPreview({
         </div>
       </div>
       <h2>{headline}</h2>
+      {resumeName && <small className="identity-preview-resume">PDF / {resumeName}</small>}
     </aside>
   )
 }
@@ -57,6 +60,13 @@ export function TemplateMiniPreview({
           <em />
         </>
       )}
+      {template === 'landing' && (
+        <>
+          <span className="landing-mini-kicker">AVAILABLE / 2026</span>
+          <strong className="landing-mini-title">CREATIVE<br />DEVELOPER</strong>
+          <i className="landing-mini-orbit" />
+        </>
+      )}
     </div>
   )
 }
@@ -81,12 +91,19 @@ export function ColorMiniPreview({
 }
 
 export function TemplateEditorBanner({ template }: { template: DevTemplate }) {
+  const labels = {
+    desktop: ['Desktop retro', 'Editando atalhos e janelas', 'Os controles desta etapa afetam a experiencia visual do Desktop.'],
+    terminal: ['Terminal hacker', 'Editando comandos e saidas', 'Somente opcoes que fazem sentido em uma interface de linha de comando sao exibidas.'],
+    docs: ['Docs moderno', 'Editando paginas e navegacao', 'Os controles desta etapa seguem a estrutura editorial de uma documentacao.'],
+    landing: ['Landing criativa', 'Editando narrativa e ritmo', 'Secoes, projetos e contatos formam uma pagina continua e interativa.'],
+  } as const
+  const [label, title, description] = labels[template]
   return (
     <aside className={`template-editor-banner template-editor-${template}`}>
-      <span>{template === 'desktop' ? 'Desktop retro' : template === 'terminal' ? 'Terminal hacker' : 'Docs moderno'}</span>
+      <span>{label}</span>
       <div>
-        <strong>{template === 'desktop' ? 'Editando atalhos e janelas' : template === 'terminal' ? 'Editando comandos e saidas' : 'Editando paginas e navegacao'}</strong>
-        <p>{template === 'desktop' ? 'Os controles desta etapa afetam a experiencia visual do Desktop.' : template === 'terminal' ? 'Somente opcoes que fazem sentido em uma interface de linha de comando sao exibidas.' : 'Os controles desta etapa seguem a estrutura editorial de uma documentacao.'}</p>
+        <strong>{title}</strong>
+        <p>{description}</p>
       </div>
     </aside>
   )
@@ -123,6 +140,16 @@ export function SectionsMiniPreview({
           ))}
         </div>
         <small>{stack.length} tecnologias na pagina Stack</small>
+      </aside>
+    )
+  }
+
+  if (template === 'landing') {
+    return (
+      <aside className="mini-preview template-data-preview landing-data-preview">
+        <span>Fluxo da landing page</span>
+        <div className="landing-section-preview">{sections.map((section, index) => <div key={section.id}><b>{String(index + 1).padStart(2, '0')}</b><strong>{section.title}</strong><span>{section.description}</span></div>)}</div>
+        <small>{stack.length} tecnologias alimentam a faixa interativa.</small>
       </aside>
     )
   }
@@ -170,14 +197,20 @@ export function ProjectsMiniPreview({ projects, template }: { projects: DevProje
 
   return (
     <aside className="mini-preview">
-      <span>{template === 'desktop' ? 'Previa dos cards na janela' : 'Previa dos cases documentados'}</span>
+      <span>{template === 'desktop' ? 'Previa dos cards na janela' : template === 'landing' ? 'Previa do showcase de projetos' : 'Previa dos cases documentados'}</span>
       <div className={`project-mini-grid project-mini-${template}`}>
         {projects.slice(0, 3).map((project) => (
           <div key={project.id}>
             {project.imageUrl && <img alt="" className="project-mini-cover" src={project.imageUrl} />}
+            {template === 'landing' && (project.category || project.featured) && (
+              <span className="project-mini-meta">
+                {project.featured ? 'Destaque' : project.category}
+                {project.year ? ` / ${project.year}` : ''}
+              </span>
+            )}
             <strong>{project.title}</strong>
             <p>{project.description}</p>
-            <small>{project.liveUrl ? 'Online' : 'Sem link publico'} / {project.repoUrl ? 'Repo' : 'Sem repo'}</small>
+            <small>{template === 'landing' && project.status ? project.status : project.liveUrl ? 'Online' : 'Sem link publico'} / {project.repoUrl ? 'Repo' : 'Sem repo'}</small>
           </div>
         ))}
       </div>
@@ -199,7 +232,7 @@ export function ContactsMiniPreview({ contacts, template }: { contacts: ContactL
 
   return (
     <aside className="mini-preview">
-      <span>{template === 'desktop' ? 'Previa dos atalhos de contato' : 'Previa das referencias de contato'}</span>
+      <span>{template === 'desktop' ? 'Previa dos atalhos de contato' : template === 'landing' ? 'Previa dos canais no fechamento' : 'Previa das referencias de contato'}</span>
       <div className="contact-mini-list">
         {contacts.map((contact) => (
           <a className={`contact-link contact-${contact.type}`} href={contact.url} key={contact.id}>
@@ -254,4 +287,3 @@ export function PreviewSummary({
     </aside>
   )
 }
-
