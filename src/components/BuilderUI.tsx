@@ -13,10 +13,12 @@ import {
 
 const stepVisuals = [UserRound, Palette, LayoutGrid, FolderKanban, AtSign, Sparkles]
 
-export function PortfyBrand({ subtitle = 'Creative portfolio studio' }: { subtitle?: string }) {
+export function PortfyBrand({ subtitle = 'Gerador de portfólios' }: { subtitle?: string }) {
   return (
     <div className="product-mark">
-      <span className="portfy-symbol" aria-hidden="true"><b>P</b><i>/</i></span>
+      <span className="portfy-symbol" aria-hidden="true">
+        <img alt="" src={`${import.meta.env.BASE_URL}favicon.svg?v=3`} />
+      </span>
       <div><strong>portfy</strong><small>{subtitle}</small></div>
     </div>
   )
@@ -26,7 +28,7 @@ export function ProjectStartScreen({ onEmpty, onPreset }: { onEmpty: () => void;
   return (
     <main className="project-start-screen">
       <section className="project-start-panel">
-        <PortfyBrand subtitle="Creative portfolio studio" />
+        <PortfyBrand subtitle="Gerador de portfólios" />
         <div className="project-start-copy">
           <p className="eyebrow">Antes de comecar</p>
           <h1>Como voce quer iniciar?</h1>

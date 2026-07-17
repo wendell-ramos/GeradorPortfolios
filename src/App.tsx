@@ -639,7 +639,7 @@ function App() {
   return (
     <main className={`flow-shell flow-template-${template}`}>
       <header className="flow-header">
-        <PortfyBrand subtitle="Creative portfolio studio" />
+        <PortfyBrand subtitle="Gerador de portfólios" />
         <div className="flow-progress" aria-label={`Etapa ${currentIndex + 1} de ${steps.length}`}>
           <div>
             <span>Seu portfolio</span>
