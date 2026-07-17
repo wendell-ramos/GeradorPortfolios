@@ -2480,7 +2480,10 @@
   }
 
   .flow-actions {
+    position: fixed;
     left: 0;
+    height: calc(54px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .flow-actions > button:first-child {
@@ -2544,7 +2547,7 @@
 
   .step-block,
   .step-block.is-wide {
-    padding-bottom: 54px;
+    padding-bottom: calc(54px + env(safe-area-inset-bottom, 0px));
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);
   }
@@ -2909,8 +2912,8 @@
   }
 
   .flow-actions {
-    height: 54px;
-    padding: 0 12px;
+    height: calc(54px + env(safe-area-inset-bottom, 0px));
+    padding: 0 12px env(safe-area-inset-bottom, 0px);
   }
 
   .flow-actions > button:not(.primary-button) {
@@ -2923,7 +2926,7 @@
 
   .step-validation-message {
     right: 12px;
-    bottom: 62px;
+    bottom: calc(62px + env(safe-area-inset-bottom, 0px));
     left: 12px;
     max-width: none;
   }
