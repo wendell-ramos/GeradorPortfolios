@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createPreviewProps } from '../test/portfolioFixture'
@@ -117,5 +117,36 @@ describe('generated templates', () => {
     rerender(<LandingGeneratedSite {...emptyProps} template="landing" />)
     expect(screen.getByRole('heading', { name: emptyProps.headline })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Explorar projetos' })).not.toBeInTheDocument()
+  })
+
+  it('renders structured education and certifications in every template', () => {
+    vi.useFakeTimers()
+    const base = createPreviewProps()
+    const props = createPreviewProps({
+      educations: [{ id: 'education-1', institution: 'Universidade Exemplo', course: 'Sistemas de Informacao', degree: 'Bacharelado', location: 'Sao Paulo', startYear: '2024', endYear: '', current: true }],
+      certifications: [{ id: 'certification-1', name: 'React com TypeScript', issuer: 'Escola Exemplo', issueDate: '07/2026', credentialId: 'ABC-123', credentialUrl: 'https://example.com/credential' }],
+      sections: [
+        ...base.sections,
+        { id: 'education', title: 'Formacao', description: 'Formacao academica', icon: 'document', terminalCommand: 'education', docsGroup: 'Perfil', enabled: true },
+        { id: 'certifications', title: 'Cursos e certificados', description: 'Credenciais', icon: 'award', terminalCommand: 'certifications', docsGroup: 'Perfil', enabled: true },
+      ],
+    })
+
+    const { rerender } = render(<DesktopGeneratedSite {...props} template="desktop" onBackgroundColorChange={() => undefined} onDesktopAreaColorChange={() => undefined} />)
+    act(() => vi.advanceTimersByTime(1100))
+    fireEvent.click(screen.getByRole('button', { name: 'Formacao' }))
+    expect(screen.getByText('Universidade Exemplo')).toBeInTheDocument()
+
+    vi.useRealTimers()
+    rerender(<TerminalGeneratedSite {...props} template="terminal" />)
+    fireEvent.click(screen.getByRole('button', { name: 'certifications' }))
+    expect(screen.getByText('React com TypeScript')).toBeInTheDocument()
+
+    rerender(<DocsGeneratedSite {...props} template="docs" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Formacao' }))
+    expect(screen.getByRole('heading', { name: 'Sistemas de Informacao' })).toBeInTheDocument()
+
+    rerender(<LandingGeneratedSite {...props} template="landing" />)
+    expect(screen.getByRole('heading', { name: 'React com TypeScript' })).toBeInTheDocument()
   })
 })

@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import type { DevExperience, DevTemplate, PortfolioSection } from '../models/portfolio'
+import type { DevEducation, DevExperience, DevTemplate, PortfolioSection } from '../models/portfolio'
 
 export function moveById<T extends { id: string }>(items: T[], id: string, direction: -1 | 1) {
   const index = items.findIndex((item) => item.id === id)
@@ -43,6 +43,12 @@ export function formatExperiencePeriod(experience: DevExperience) {
   const start = formatMonth(experience.startDate) || 'Inicio nao informado'
   const end = experience.current ? 'Atual' : formatMonth(experience.endDate) || 'Saida nao informada'
   return `${start} - ${end}`
+}
+
+export function formatEducationPeriod(education: DevEducation) {
+  const start = education.startYear.trim()
+  const end = education.current ? 'Em andamento' : education.endYear.trim()
+  return [start, end].filter(Boolean).join(' - ') || 'Periodo nao informado'
 }
 
 export function terminalSlug(value: string) {

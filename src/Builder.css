@@ -3070,3 +3070,198 @@
 @keyframes pf-spin {
   to { transform: rotate(360deg); }
 }
+
+.professional-content-editors {
+  display: grid;
+  gap: 18px;
+}
+
+.structured-content-editor {
+  overflow: hidden;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-lg);
+  background: var(--pf-panel);
+}
+
+.structured-content-editor > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--pf-border);
+  background: var(--pf-panel-raised);
+}
+
+.structured-content-editor > header > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--pf-accent) 45%, transparent);
+  border-radius: 9px;
+  color: var(--pf-accent-soft);
+  background: color-mix(in srgb, var(--pf-accent) 12%, transparent);
+}
+
+.structured-content-editor > header svg,
+.structured-content-editor > header button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.structured-content-editor > header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.structured-content-editor > header strong,
+.structured-content-editor > header small {
+  display: block;
+}
+
+.structured-content-editor > header small,
+.structured-empty p,
+.structured-current-field small {
+  color: var(--pf-text-muted);
+}
+
+.structured-content-editor > header button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.structured-entry-list {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.structured-entry {
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-md);
+  background: var(--pf-surface);
+}
+
+.structured-entry-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--pf-border);
+}
+
+.structured-entry-heading > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.structured-entry-heading span {
+  color: var(--pf-accent-soft);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.structured-entry-heading > div:last-child {
+  display: flex;
+  gap: 6px;
+}
+
+.structured-entry-heading button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--pf-border);
+  border-radius: 7px;
+  color: var(--pf-text-secondary);
+  background: transparent;
+}
+
+.structured-entry-heading button:hover:not(:disabled) {
+  border-color: var(--pf-border-strong);
+  color: var(--pf-text);
+  background: var(--pf-panel-raised);
+}
+
+.structured-entry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+}
+
+.structured-wide-field {
+  grid-column: 1 / -1;
+}
+
+.structured-current-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 14px 14px;
+  padding: 11px 12px;
+  border: 1px solid var(--pf-border);
+  border-radius: 8px;
+  background: var(--pf-panel-raised);
+}
+
+.structured-current-field input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--pf-accent);
+}
+
+.structured-current-field span {
+  display: grid;
+  gap: 2px;
+}
+
+.structured-empty {
+  padding: 22px;
+  border: 1px dashed var(--pf-border-strong);
+  border-radius: var(--pf-radius-md);
+  text-align: center;
+}
+
+.structured-empty p {
+  margin: 5px 0 0;
+}
+
+.preset-section-grid button:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+@media (max-width: 760px) {
+  .structured-content-editor > header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .structured-content-editor > header button {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+
+  .structured-entry-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .structured-wide-field {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .structured-entry-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .structured-entry-heading > div:last-child {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

@@ -9,6 +9,8 @@ export function LandingGeneratedSite({
   backgroundColor,
   bio,
   contacts,
+  certifications,
+  educations,
   experiences,
   headline,
   location,
@@ -39,6 +41,8 @@ export function LandingGeneratedSite({
     : orderedProjects.filter((project) => project.category.trim() === selectedCategory)
   const visibleContacts = contacts.filter((contact) => contact.value.trim() && contact.url.trim())
   const visibleExperiences = experiences.filter((experience) => experience.company.trim() || experience.role.trim())
+  const visibleEducations = educations.filter((education) => education.institution.trim() || education.course.trim())
+  const visibleCertifications = certifications.filter((certification) => certification.name.trim() || certification.issuer.trim())
   const firstSectionId = renderedSections[0]?.id
   const metrics = [
     { value: settings.metricOneValue, label: settings.metricOneLabel },
@@ -195,6 +199,28 @@ export function LandingGeneratedSite({
                       </div>
                     </article>
                   ))}
+                </div>
+              </section>
+            )
+          }
+
+          if (section.id === 'education') {
+            return (
+              <section className="landing-section landing-records" id="landing-education" key={section.id}>
+                <LandingSectionHeading index={sectionIndex} label="Formacao" title="Aprendizado que sustenta a pratica." />
+                <div className="landing-record-list">
+                  {visibleEducations.length ? visibleEducations.map((education, itemIndex) => <article key={education.id}><span>{String(itemIndex + 1).padStart(2, '0')}</span><div><small>{education.current ? 'Em andamento' : education.endYear || 'Formacao'}</small><h3>{education.course || 'Curso nao informado'}</h3><strong>{education.institution || 'Instituicao nao informada'}</strong><p>{[education.degree, education.location, [education.startYear, education.current ? 'Atual' : education.endYear].filter(Boolean).join(' - ')].filter(Boolean).join(' / ')}</p></div></article>) : <p className="landing-record-empty">Nenhuma formacao cadastrada.</p>}
+                </div>
+              </section>
+            )
+          }
+
+          if (section.id === 'certifications') {
+            return (
+              <section className="landing-section landing-records" id="landing-certifications" key={section.id}>
+                <LandingSectionHeading index={sectionIndex} label="Certificacoes" title="Conhecimento validado, evolucao continua." />
+                <div className="landing-record-list">
+                  {visibleCertifications.length ? visibleCertifications.map((certification, itemIndex) => <article key={certification.id}><span>{String(itemIndex + 1).padStart(2, '0')}</span><div><small>{certification.issueDate || 'Credencial'}</small><h3>{certification.name || 'Certificacao'}</h3><strong>{certification.issuer || 'Instituicao nao informada'}</strong>{certification.credentialId && <p>ID {certification.credentialId}</p>}{certification.credentialUrl && <a href={certification.credentialUrl} rel="noreferrer" target="_blank">Ver credencial <ArrowUpRight aria-hidden="true" /></a>}</div></article>) : <p className="landing-record-empty">Nenhuma certificacao cadastrada.</p>}
                 </div>
               </section>
             )

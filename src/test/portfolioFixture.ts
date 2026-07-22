@@ -25,6 +25,8 @@ export function createPreviewProps(
     desktopAreaColors: draft.desktopAreaColors,
     bio: draft.bio,
     contacts: draft.contacts,
+    certifications: draft.certifications,
+    educations: draft.educations,
     experiences: draft.experiences,
     headline: draft.headline,
     location: draft.location,

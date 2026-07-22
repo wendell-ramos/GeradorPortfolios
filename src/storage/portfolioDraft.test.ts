@@ -67,6 +67,8 @@ describe('portfolio draft storage', () => {
     })
     expect(normalized?.templateSettings.landing.composition).toBe('editorial')
     expect(normalized?.sections).not.toHaveLength(0)
+    expect(normalized?.educations).toEqual([])
+    expect(normalized?.certifications).toEqual([])
   })
 
   it('ignores malformed values instead of exposing them to the app', () => {
@@ -74,6 +76,8 @@ describe('portfolio draft storage', () => {
     expect(normalizePortfolioDraft('invalid draft')).toBeNull()
     expect(normalizePortfolioDraft({ version: 1, experiences: ['invalid'], projects: [null], contacts: [42] })).toMatchObject({
       experiences: [],
+      educations: [],
+      certifications: [],
       projects: [],
       contacts: [],
     })

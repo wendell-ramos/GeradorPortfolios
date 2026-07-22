@@ -7,6 +7,8 @@ export function TerminalGeneratedSite({
   backgroundColor,
   bio,
   contacts,
+  certifications,
+  educations,
   experiences,
   headline,
   location,
@@ -22,10 +24,12 @@ export function TerminalGeneratedSite({
 }: PortfolioPreviewProps) {
   const enabledSections = sections.filter((section) => section.enabled)
   const hasSection = (id: DefaultSection) => enabledSections.some((section) => section.id === id)
-  const customSections = enabledSections.filter((section) => !['about', 'stack', 'projects', 'contact'].includes(section.id))
+  const customSections = enabledSections.filter((section) => !['about', 'stack', 'education', 'certifications', 'projects', 'contact'].includes(section.id))
   const visibleProjects = projects.filter((project) => project.title.trim())
   const visibleContacts = contacts.filter((contact) => contact.value.trim() && contact.url.trim())
   const visibleExperiences = experiences.filter((experience) => experience.company.trim() || experience.role.trim())
+  const visibleEducations = educations.filter((education) => education.institution.trim() || education.course.trim())
+  const visibleCertifications = certifications.filter((certification) => certification.name.trim() || certification.issuer.trim())
   const userName = terminalSlug(name).replace(/-/g, '_') || 'dev'
   const terminalHost = templateSettings.terminal.host || 'portfolio'
   const prompt = `${userName}@${terminalHost}:~/portfolio$`
@@ -35,6 +39,8 @@ export function TerminalGeneratedSite({
     { id: 'help', label: 'help', aliases: ['help', 'ajuda'] },
     ...(hasSection('about') ? [{ id: 'whoami', label: sectionCommand('about', 'whoami'), aliases: [sectionCommand('about', 'whoami'), 'whoami', 'about', 'sobre', 'bio'] }] : []),
     ...(hasSection('stack') ? [{ id: 'stack', label: sectionCommand('stack', 'stack'), aliases: [sectionCommand('stack', 'stack'), 'stack', 'skills', 'habilidades', 'tecnologias'] }] : []),
+    ...(hasSection('education') ? [{ id: 'education', label: sectionCommand('education', 'education'), aliases: [sectionCommand('education', 'education'), 'education', 'formacao', 'academic'] }] : []),
+    ...(hasSection('certifications') ? [{ id: 'certifications', label: sectionCommand('certifications', 'certifications'), aliases: [sectionCommand('certifications', 'certifications'), 'certifications', 'certificados', 'courses', 'cursos'] }] : []),
     ...(hasSection('projects') ? [{ id: 'projects', label: sectionCommand('projects', 'projects'), aliases: [sectionCommand('projects', 'projects'), 'projects', 'projetos', 'ls-projects'] }] : []),
     ...(visibleExperiences.length ? [{ id: 'experience', label: 'experience', aliases: ['experience', 'experiences', 'experiencia', 'experiencias', 'work'] }] : []),
     ...(resumeEnabled && resumeFile ? [{ id: 'resume', label: 'resume', aliases: ['resume', 'cv', 'curriculo'] }] : []),
@@ -101,7 +107,7 @@ export function TerminalGeneratedSite({
             {commands.filter((command) => command.id !== 'help').map((command) => (
               <div key={command.id}>
                 <dt>{command.label}</dt>
-                <dd>{command.id === 'whoami' ? 'identidade e resumo profissional' : command.id === 'stack' ? 'tecnologias e ferramentas' : command.id === 'projects' ? 'projetos publicados e repositorios' : command.id === 'experience' ? 'historico profissional' : command.id === 'resume' ? 'abre o curriculo em PDF' : command.id === 'contact' ? 'canais para contato' : 'arquivo de secao personalizada'}</dd>
+                <dd>{command.id === 'whoami' ? 'identidade e resumo profissional' : command.id === 'stack' ? 'tecnologias e ferramentas' : command.id === 'education' ? 'formacao academica' : command.id === 'certifications' ? 'cursos e credenciais' : command.id === 'projects' ? 'projetos publicados e repositorios' : command.id === 'experience' ? 'historico profissional' : command.id === 'resume' ? 'abre o curriculo em PDF' : command.id === 'contact' ? 'canais para contato' : 'arquivo de secao personalizada'}</dd>
               </div>
             ))}
             <div><dt>clear</dt><dd>limpa a tela do terminal</dd></div>
@@ -157,6 +163,14 @@ export function TerminalGeneratedSite({
           )) : <p className="terminal-muted">Nenhum projeto encontrado em ~/projects.</p>}
         </div>
       )
+    }
+
+    if (activeCommand === 'education') {
+      return <div className="terminal-record-output"><p>Formacao academica ({visibleEducations.length}):</p>{visibleEducations.length ? visibleEducations.map((education, index) => <article key={education.id}><p><span>[{String(index + 1).padStart(2, '0')}]</span> {education.course || 'Curso nao informado'}</p><p>{education.institution || 'Instituicao nao informada'}{education.degree ? ` | ${education.degree}` : ''}</p><p>{education.startYear || '?'} - {education.current ? 'em andamento' : education.endYear || '?'}{education.location ? ` | ${education.location}` : ''}</p></article>) : <p className="terminal-muted">Nenhuma formacao cadastrada.</p>}</div>
+    }
+
+    if (activeCommand === 'certifications') {
+      return <div className="terminal-record-output"><p>Credenciais encontradas ({visibleCertifications.length}):</p>{visibleCertifications.length ? visibleCertifications.map((certification, index) => <article key={certification.id}><p><span>[{String(index + 1).padStart(2, '0')}]</span> {certification.name || 'Certificacao'}</p><p>{certification.issuer || 'Instituicao nao informada'}{certification.issueDate ? ` | ${certification.issueDate}` : ''}</p>{certification.credentialId && <p>id: {certification.credentialId}</p>}{certification.credentialUrl && <a href={certification.credentialUrl} rel="noreferrer" target="_blank">[validar credencial]</a>}</article>) : <p className="terminal-muted">Nenhuma certificacao cadastrada.</p>}</div>
     }
 
     if (activeCommand === 'experience') {

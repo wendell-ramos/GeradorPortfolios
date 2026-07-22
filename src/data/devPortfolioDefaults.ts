@@ -1,4 +1,4 @@
-import type { BuilderStep, ContactLink, DefaultSection, DesktopColorTarget, DesktopEditableTarget, DevExperience, DevProject, DevTemplate, DevTemplateOption, PortfolioSection, SectionIcon, TemplateSettings } from '../models/portfolio'
+import type { BuilderStep, ContactLink, DefaultSection, DesktopColorTarget, DesktopEditableTarget, DevCertification, DevEducation, DevExperience, DevProject, DevTemplate, DevTemplateOption, PortfolioSection, SectionIcon, TemplateSettings } from '../models/portfolio'
 
 const exampleResumeUrl = `${import.meta.env.BASE_URL}examples/curriculo-wendell-ramos.pdf`
 
@@ -17,6 +17,8 @@ export const devTemplates: DevTemplateOption[] = [
 export const defaultSections: Record<DefaultSection, Omit<PortfolioSection, 'id' | 'enabled' | 'locked'>> = {
   about: { title: 'Sobre', description: 'Resumo, trajetoria profissional, contexto e foco de atuacao.', icon: 'user', terminalCommand: 'whoami', docsGroup: 'Perfil' },
   stack: { title: 'Stack', description: 'Tecnologias, ferramentas e conhecimentos principais.', icon: 'code', terminalCommand: 'stack', docsGroup: 'Perfil' },
+  education: { title: 'Formacao', description: 'Formacao academica, instituicoes e periodo de estudo.', icon: 'document', terminalCommand: 'education', docsGroup: 'Perfil' },
+  certifications: { title: 'Cursos e certificados', description: 'Cursos, certificacoes e credenciais profissionais.', icon: 'award', terminalCommand: 'certifications', docsGroup: 'Perfil' },
   projects: { title: 'Projetos', description: 'Cases com descricao, tecnologias e links clicaveis.', icon: 'folder', terminalCommand: 'projects', docsGroup: 'Trabalho' },
   contact: { title: 'Contato', description: 'Links para email, GitHub, LinkedIn, WhatsApp ou site.', icon: 'mail', terminalCommand: 'contact', docsGroup: 'Conecte-se' },
 }
@@ -60,8 +62,9 @@ export const sectionIconOptions: Array<{ id: SectionIcon; label: string }> = [
   { id: 'message', label: 'Depoimentos' }, { id: 'document', label: 'Documento' }, { id: 'terminal', label: 'Terminal' }, { id: 'link', label: 'Link' },
 ]
 
-export const sectionPresets: Array<Omit<PortfolioSection, 'id' | 'enabled'>> = [
-  { title: 'Certificados', description: 'Cursos, bootcamps, eventos e certificados relevantes.', icon: 'award' },
+export const sectionPresets: Array<Omit<PortfolioSection, 'id' | 'enabled'> & { id?: string }> = [
+  { id: 'education', ...defaultSections.education },
+  { id: 'certifications', ...defaultSections.certifications },
   { title: 'Eventos', description: 'Hackathons, palestras, visitas tecnicas e experiencias academicas.', icon: 'calendar' },
   { title: 'Servicos', description: 'Tipos de solucao que voce pode desenvolver para clientes.', icon: 'briefcase' },
   { title: 'Depoimentos', description: 'Comentarios de clientes, professores, colegas ou parceiros.', icon: 'message' },
@@ -87,6 +90,8 @@ export function createDefaultSections(): PortfolioSection[] {
 }
 
 export function createPresetDevPortfolio() {
+  const educations: DevEducation[] = []
+  const certifications: DevCertification[] = []
   const experiences: DevExperience[] = [{
     id: crypto.randomUUID(),
     company: 'Projetos independentes',
@@ -128,6 +133,8 @@ export function createPresetDevPortfolio() {
     resumeFile: exampleResumeUrl,
     resumeName: 'Curriculo - Wendell Ramos.pdf',
     experiences,
+    educations,
+    certifications,
     stackText: 'React\nTypeScript\nASP.NET MVC\nC#\nPostgreSQL\nCloudflare',
     sections: createDefaultSections(),
     projects,

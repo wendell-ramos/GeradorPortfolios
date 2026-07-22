@@ -8,6 +8,8 @@ export function DocsGeneratedSite({
   backgroundColor,
   bio,
   contacts,
+  certifications,
+  educations,
   experiences,
   headline,
   location,
@@ -26,13 +28,17 @@ export function DocsGeneratedSite({
   const visibleProjects = projects.filter((project) => project.title.trim())
   const visibleContacts = contacts.filter((contact) => contact.value.trim() && contact.url.trim())
   const visibleExperiences = experiences.filter((experience) => experience.company.trim() || experience.role.trim())
-  const customSections = enabledSections.filter((section) => !['about', 'stack', 'projects', 'contact'].includes(section.id))
+  const visibleEducations = educations.filter((education) => education.institution.trim() || education.course.trim())
+  const visibleCertifications = certifications.filter((certification) => certification.name.trim() || certification.issuer.trim())
+  const customSections = enabledSections.filter((section) => !['about', 'stack', 'education', 'certifications', 'projects', 'contact'].includes(section.id))
   const hasSection = (id: DefaultSection) => enabledSections.some((section) => section.id === id)
   const docsGroupFor = (id: DefaultSection, fallback: string) => enabledSections.find((section) => section.id === id)?.docsGroup || fallback
   const docsPages = [
     { id: 'overview', label: 'Overview', group: 'Comece aqui' },
     ...(hasSection('about') ? [{ id: 'about', label: enabledSections.find((section) => section.id === 'about')?.title || 'Sobre', group: docsGroupFor('about', 'Perfil') }] : []),
     ...(hasSection('stack') ? [{ id: 'stack', label: enabledSections.find((section) => section.id === 'stack')?.title || 'Stack', group: docsGroupFor('stack', 'Perfil') }] : []),
+    ...(hasSection('education') ? [{ id: 'education', label: enabledSections.find((section) => section.id === 'education')?.title || 'Formacao', group: docsGroupFor('education', 'Perfil') }] : []),
+    ...(hasSection('certifications') ? [{ id: 'certifications', label: enabledSections.find((section) => section.id === 'certifications')?.title || 'Certificacoes', group: docsGroupFor('certifications', 'Perfil') }] : []),
     ...(hasSection('projects') ? [{ id: 'projects', label: enabledSections.find((section) => section.id === 'projects')?.title || 'Projetos', group: docsGroupFor('projects', 'Trabalho') }] : []),
     ...(hasSection('contact') ? [{ id: 'contact', label: enabledSections.find((section) => section.id === 'contact')?.title || 'Contato', group: docsGroupFor('contact', 'Conecte-se') }] : []),
     ...customSections.map((section) => ({ id: `custom:${section.id}`, label: section.title, group: section.docsGroup || 'Mais' })),
@@ -142,6 +148,26 @@ export function DocsGeneratedSite({
     </div>
   )
 
+  const renderEducation = () => (
+    <div className="docs-page">
+      <div className="docs-breadcrumb"><span>Perfil</span><b>/</b><strong>Formacao</strong></div>
+      <header className="docs-page-header"><p className="docs-page-kicker">Trajetoria academica</p><h1>Formacao</h1><p>Instituicoes, cursos e etapas que fazem parte da minha base profissional.</p></header>
+      <div className="docs-record-list">
+        {visibleEducations.length ? visibleEducations.map((education, index) => <article key={education.id}><span>{String(index + 1).padStart(2, '0')}</span><div><div><h2>{education.course || 'Curso nao informado'}</h2><time>{education.startYear || '?'} - {education.current ? 'Em andamento' : education.endYear || '?'}</time></div><strong>{education.institution || 'Instituicao nao informada'}</strong><p>{[education.degree, education.location].filter(Boolean).join(' / ')}</p></div></article>) : <div className="docs-empty-state"><strong>Nenhuma formacao cadastrada</strong><p>As informacoes academicas aparecerao nesta pagina.</p></div>}
+      </div>
+    </div>
+  )
+
+  const renderCertifications = () => (
+    <div className="docs-page">
+      <div className="docs-breadcrumb"><span>Perfil</span><b>/</b><strong>Certificacoes</strong></div>
+      <header className="docs-page-header"><p className="docs-page-kicker">Credenciais profissionais</p><h1>Cursos e certificacoes</h1><p>Aprendizados complementares e credenciais que podem ser verificadas.</p></header>
+      <div className="docs-record-list">
+        {visibleCertifications.length ? visibleCertifications.map((certification, index) => <article key={certification.id}><span>{String(index + 1).padStart(2, '0')}</span><div><div><h2>{certification.name || 'Certificacao'}</h2><time>{certification.issueDate || 'Data nao informada'}</time></div><strong>{certification.issuer || 'Instituicao nao informada'}</strong>{certification.credentialId && <p>Credencial: <code>{certification.credentialId}</code></p>}{certification.credentialUrl && <a href={certification.credentialUrl} rel="noreferrer" target="_blank">Validar credencial <span>-&gt;</span></a>}</div></article>) : <div className="docs-empty-state"><strong>Nenhuma certificacao cadastrada</strong><p>Os cursos e certificados aparecerao nesta pagina.</p></div>}
+      </div>
+    </div>
+  )
+
   const renderContact = () => (
     <div className="docs-page">
       <div className="docs-breadcrumb"><span>Conecte-se</span><b>/</b><strong>Contato</strong></div>
@@ -156,6 +182,8 @@ export function DocsGeneratedSite({
     if (activePage === 'overview') return renderOverview()
     if (activePage === 'about') return renderAbout()
     if (activePage === 'stack') return renderStack()
+    if (activePage === 'education') return renderEducation()
+    if (activePage === 'certifications') return renderCertifications()
     if (activePage === 'projects') return renderProjects()
     if (activePage === 'contact') return renderContact()
     const section = customSections.find((item) => `custom:${item.id}` === activePage)

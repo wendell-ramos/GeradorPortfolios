@@ -7,6 +7,8 @@ import type {
   ContactLink,
   ContactType,
   DesktopColorTarget,
+  DevCertification,
+  DevEducation,
   DevExperience,
   DevProject,
   DevTemplate,
@@ -62,6 +64,8 @@ function App() {
   const [resumeFileError, setResumeFileError] = useState('')
   const [projectImageErrors, setProjectImageErrors] = useState<Record<string, string>>({})
   const [experiences, setExperiences] = useState<DevExperience[]>(initialPreset.experiences)
+  const [educations, setEducations] = useState<DevEducation[]>(initialPreset.educations)
+  const [certifications, setCertifications] = useState<DevCertification[]>(initialPreset.certifications)
 
   function handleProfilePhoto(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -158,6 +162,40 @@ function App() {
   function moveExperience(experienceId: string, direction: -1 | 1) {
     setExperiences((current) => moveById(current, experienceId, direction))
   }
+
+  function addEducation() {
+    setEducations((current) => [...current, { id: crypto.randomUUID(), institution: '', course: '', degree: '', location: '', startYear: '', endYear: '', current: false }])
+  }
+
+  function updateEducation<K extends keyof Omit<DevEducation, 'id'>>(educationId: string, field: K, value: DevEducation[K]) {
+    setEducations((current) => current.map((item) => item.id === educationId
+      ? { ...item, [field]: value, ...(field === 'current' && value ? { endYear: '' } : {}) }
+      : item))
+  }
+
+  function removeEducation(educationId: string) {
+    setEducations((current) => current.filter((item) => item.id !== educationId))
+  }
+
+  function moveEducation(educationId: string, direction: -1 | 1) {
+    setEducations((current) => moveById(current, educationId, direction))
+  }
+
+  function addCertification() {
+    setCertifications((current) => [...current, { id: crypto.randomUUID(), name: '', issuer: '', issueDate: '', credentialId: '', credentialUrl: '' }])
+  }
+
+  function updateCertification<K extends keyof Omit<DevCertification, 'id'>>(certificationId: string, field: K, value: DevCertification[K]) {
+    setCertifications((current) => current.map((item) => item.id === certificationId ? { ...item, [field]: value } : item))
+  }
+
+  function removeCertification(certificationId: string) {
+    setCertifications((current) => current.filter((item) => item.id !== certificationId))
+  }
+
+  function moveCertification(certificationId: string, direction: -1 | 1) {
+    setCertifications((current) => moveById(current, certificationId, direction))
+  }
   const [stackText, setStackText] = useState(initialPreset.stackText)
   const [sections, setSections] = useState<PortfolioSection[]>(initialPreset.sections)
   const [customSectionTitle, setCustomSectionTitle] = useState('')
@@ -192,6 +230,8 @@ function App() {
     setResumeName(draft.resumeName ?? '')
     setResumeFileError('')
     setExperiences(draft.experiences)
+    setEducations(draft.educations)
+    setCertifications(draft.certifications)
     setStackText(draft.stackText)
     setSections(draft.sections)
     setProjects((draft.projects ?? []).map((project, index) => ({
@@ -226,12 +266,14 @@ function App() {
       resumeFile,
       resumeName,
       experiences,
+      educations,
+      certifications,
       stackText,
       sections,
       projects,
       contacts,
     }
-  ), [accentColor, bio, contacts, desktopAreaColors, experiences, headline, location, maxUnlockedStep, name, profilePhoto, projects, resumeEnabled, resumeFile, resumeName, role, sections, stackText, step, template, templateBackgrounds, templateSettings])
+  ), [accentColor, bio, certifications, contacts, desktopAreaColors, educations, experiences, headline, location, maxUnlockedStep, name, profilePhoto, projects, resumeEnabled, resumeFile, resumeName, role, sections, stackText, step, template, templateBackgrounds, templateSettings])
 
   const { draftErrorReason, draftReady, draftStatus, saveNow } = usePortfolioDraftPersistence({
     currentDraft,
@@ -337,17 +379,20 @@ function App() {
     setSections((current) => current.filter((section) => section.id !== sectionId || section.locked))
   }
 
-  function addPresetSection(section: Omit<PortfolioSection, 'id' | 'enabled'>) {
-    setSections((current) => [
-      ...current,
-      {
+  function addPresetSection(section: Omit<PortfolioSection, 'id' | 'enabled'> & { id?: string }) {
+    setSections((current) => {
+      if (section.id && current.some((item) => item.id === section.id)) return current
+      return [
+        ...current,
+        {
         ...section,
-        id: crypto.randomUUID(),
-        terminalCommand: terminalSlug(section.title),
-        docsGroup: 'Mais',
+        id: section.id || crypto.randomUUID(),
+        terminalCommand: section.terminalCommand || terminalSlug(section.title),
+        docsGroup: section.docsGroup || 'Mais',
         enabled: true,
-      },
-    ])
+        },
+      ]
+    })
   }
 
   function moveSection(sectionId: string, direction: -1 | 1) {
@@ -532,6 +577,8 @@ function App() {
     setResumeFileError('')
     setProjectImageErrors({})
     setExperiences([])
+    setEducations([])
+    setCertifications([])
     setStackText('')
     setSections(createDefaultSections())
     setCustomSectionTitle('')
@@ -566,6 +613,8 @@ function App() {
     setResumeFileError('')
     setProjectImageErrors({})
     setExperiences(preset.experiences)
+    setEducations(preset.educations)
+    setCertifications(preset.certifications)
     setStackText(preset.stackText)
     setSections(preset.sections)
     setCustomSectionTitle('')
@@ -601,6 +650,8 @@ function App() {
         desktopAreaColors={desktopAreaColors}
         bio={bio}
         contacts={contacts}
+        certifications={certifications}
+        educations={educations}
         experiences={experiences}
         headline={headline}
         location={location}
@@ -724,12 +775,20 @@ function App() {
           <SectionsStep
             addCustomSection={addCustomSection}
             addPresetSection={addPresetSection}
+            addCertification={addCertification}
+            addEducation={addEducation}
+            certifications={certifications}
             customSectionDescription={customSectionDescription}
             customSectionIcon={customSectionIcon}
             customSectionTitle={customSectionTitle}
             enabledSections={enabledSections}
+            educations={educations}
+            moveCertification={moveCertification}
+            moveEducation={moveEducation}
             moveSection={moveSection}
             removeSection={removeSection}
+            removeCertification={removeCertification}
+            removeEducation={removeEducation}
             sections={sections}
             setCustomSectionDescription={setCustomSectionDescription}
             setCustomSectionIcon={setCustomSectionIcon}
@@ -743,6 +802,8 @@ function App() {
             updateSectionDocsGroup={updateSectionDocsGroup}
             updateSectionIcon={updateSectionIcon}
             updateSectionTerminalCommand={updateSectionTerminalCommand}
+            updateCertification={updateCertification}
+            updateEducation={updateEducation}
           />
         )}
 

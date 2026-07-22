@@ -1,19 +1,28 @@
-import type { DevTemplate, PortfolioSection, SectionIcon } from '../models/portfolio'
+import type { DevCertification, DevEducation, DevTemplate, PortfolioSection, SectionIcon } from '../models/portfolio'
 import { sectionIconOptions, sectionPresets } from '../data/devPortfolioDefaults'
 import { defaultSectionSurface, terminalSlug } from '../utils/portfolio'
 import { StepBlock, TextArea, TextInput } from '../components/BuilderUI'
 import { SectionIconGlyph } from '../components/PortfolioIcons'
 import { SectionsMiniPreview, TemplateEditorBanner } from '../components/PortfolioPreviews'
+import { ProfessionalContentEditors } from '../components/ProfessionalContentEditors'
 
 interface SectionsStepProps {
   addCustomSection: () => void
-  addPresetSection: (section: Omit<PortfolioSection, 'id' | 'enabled'>) => void
+  addPresetSection: (section: Omit<PortfolioSection, 'id' | 'enabled'> & { id?: string }) => void
+  addCertification: () => void
+  addEducation: () => void
+  certifications: DevCertification[]
   customSectionDescription: string
   customSectionIcon: SectionIcon
   customSectionTitle: string
   enabledSections: PortfolioSection[]
+  educations: DevEducation[]
+  moveCertification: (id: string, direction: -1 | 1) => void
+  moveEducation: (id: string, direction: -1 | 1) => void
   moveSection: (id: string, direction: -1 | 1) => void
   removeSection: (id: string) => void
+  removeCertification: (id: string) => void
+  removeEducation: (id: string) => void
   sections: PortfolioSection[]
   setCustomSectionDescription: (value: string) => void
   setCustomSectionIcon: (icon: SectionIcon) => void
@@ -27,17 +36,27 @@ interface SectionsStepProps {
   updateSectionDocsGroup: (id: string, group: string) => void
   updateSectionIcon: (id: string, icon: SectionIcon) => void
   updateSectionTerminalCommand: (id: string, command: string) => void
+  updateCertification: <K extends keyof Omit<DevCertification, 'id'>>(id: string, field: K, value: DevCertification[K]) => void
+  updateEducation: <K extends keyof Omit<DevEducation, 'id'>>(id: string, field: K, value: DevEducation[K]) => void
 }
 
 export function SectionsStep({
   addCustomSection,
   addPresetSection,
+  addCertification,
+  addEducation,
+  certifications,
   customSectionDescription,
   customSectionIcon,
   customSectionTitle,
   enabledSections,
+  educations,
+  moveCertification,
+  moveEducation,
   moveSection,
   removeSection,
+  removeCertification,
+  removeEducation,
   sections,
   setCustomSectionDescription,
   setCustomSectionIcon,
@@ -51,6 +70,8 @@ export function SectionsStep({
   updateSectionDocsGroup,
   updateSectionIcon,
   updateSectionTerminalCommand,
+  updateCertification,
+  updateEducation,
 }: SectionsStepProps) {
   return (
   <StepBlock
@@ -61,7 +82,7 @@ export function SectionsStep({
     <TemplateEditorBanner template={template} />
     <div className={`preset-section-grid preset-section-${template}`}>
       {sectionPresets.map((section) => (
-        <button key={section.title} onClick={() => addPresetSection(section)} type="button">
+        <button disabled={Boolean(section.id && sections.some((item) => item.id === section.id))} key={section.title} onClick={() => addPresetSection(section)} type="button">
           {template === 'desktop' && <SectionIconGlyph icon={section.icon} />}
           {template === 'terminal' && <code>./{terminalSlug(section.title)}</code>}
           {template === 'docs' && <small>Nova pagina</small>}
@@ -139,6 +160,21 @@ export function SectionsStep({
         </article>
       ))}
     </div>
+
+    <ProfessionalContentEditors
+      addCertification={addCertification}
+      addEducation={addEducation}
+      certifications={certifications}
+      educations={educations}
+      hasCertificationsSection={sections.some((section) => section.id === 'certifications')}
+      hasEducationSection={sections.some((section) => section.id === 'education')}
+      moveCertification={moveCertification}
+      moveEducation={moveEducation}
+      removeCertification={removeCertification}
+      removeEducation={removeEducation}
+      updateCertification={updateCertification}
+      updateEducation={updateEducation}
+    />
 
     <div className="add-box">
       <TextInput label="Nome da nova secao" onChange={setCustomSectionTitle} placeholder="Ex.: Certificados" value={customSectionTitle} />

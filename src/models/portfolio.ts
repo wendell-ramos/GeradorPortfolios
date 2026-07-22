@@ -3,7 +3,7 @@ export type DevTemplate = 'desktop' | 'terminal' | 'docs' | 'landing'
 export type LandingComposition = 'editorial' | 'profile' | 'projects'
 export type DesktopColorTarget = 'titlebar' | 'menu' | 'window' | 'statusbar' | 'taskbar'
 export type DesktopEditableTarget = 'background' | DesktopColorTarget
-export type DefaultSection = 'about' | 'stack' | 'projects' | 'contact'
+export type DefaultSection = 'about' | 'stack' | 'education' | 'certifications' | 'projects' | 'contact'
 export type SectionIcon = 'home' | 'user' | 'code' | 'folder' | 'mail' | 'calendar' | 'award' | 'briefcase' | 'message' | 'document' | 'terminal' | 'link'
 
 export type PortfolioSection = {
@@ -33,6 +33,8 @@ export type DevProject = {
   featured: boolean
 }
 export type DevExperience = { id: string; company: string; city: string; role: string; activities: string; startDate: string; endDate: string; current: boolean }
+export type DevEducation = { id: string; institution: string; course: string; degree: string; location: string; startYear: string; endYear: string; current: boolean }
+export type DevCertification = { id: string; name: string; issuer: string; issueDate: string; credentialId: string; credentialUrl: string }
 export type ContactType = 'email' | 'github' | 'linkedin' | 'whatsapp' | 'instagram' | 'x' | 'portfolio'
 export type ContactLink = { id: string; type: ContactType; label: string; value: string; url: string }
 export type DevTemplateOption = { id: DevTemplate; label: string; description: string }
@@ -80,6 +82,8 @@ export type PortfolioDraft = {
   resumeFile: string
   resumeName: string
   experiences: DevExperience[]
+  educations: DevEducation[]
+  certifications: DevCertification[]
   stackText: string
   sections: PortfolioSection[]
   projects: DevProject[]
@@ -93,6 +97,8 @@ export type PortfolioPreviewProps = {
   bio: string
   contacts: ContactLink[]
   experiences: DevExperience[]
+  educations: DevEducation[]
+  certifications: DevCertification[]
   headline: string
   location: string
   name: string

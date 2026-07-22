@@ -8,6 +8,8 @@ import {
 import type {
   ContactLink,
   ContactType,
+  DevCertification,
+  DevEducation,
   DevExperience,
   DevProject,
   DevTemplate,
@@ -65,6 +67,32 @@ function normalizeExperience(value: unknown): DevExperience | null {
     startDate: stringValue(value.startDate),
     endDate: stringValue(value.endDate),
     current: booleanValue(value.current),
+  }
+}
+
+function normalizeEducation(value: unknown): DevEducation | null {
+  if (!isRecord(value)) return null
+  return {
+    id: stringValue(value.id, createId('education')),
+    institution: stringValue(value.institution),
+    course: stringValue(value.course),
+    degree: stringValue(value.degree),
+    location: stringValue(value.location),
+    startYear: stringValue(value.startYear),
+    endYear: stringValue(value.endYear),
+    current: booleanValue(value.current),
+  }
+}
+
+function normalizeCertification(value: unknown): DevCertification | null {
+  if (!isRecord(value)) return null
+  return {
+    id: stringValue(value.id, createId('certification')),
+    name: stringValue(value.name),
+    issuer: stringValue(value.issuer),
+    issueDate: stringValue(value.issueDate),
+    credentialId: stringValue(value.credentialId),
+    credentialUrl: stringValue(value.credentialUrl),
   }
 }
 
@@ -167,6 +195,12 @@ export function normalizePortfolioDraft(value: unknown): PortfolioDraft | null {
     resumeName: stringValue(value.resumeName),
     experiences: Array.isArray(value.experiences)
       ? value.experiences.map(normalizeExperience).filter((item): item is DevExperience => Boolean(item))
+      : [],
+    educations: Array.isArray(value.educations)
+      ? value.educations.map(normalizeEducation).filter((item): item is DevEducation => Boolean(item))
+      : [],
+    certifications: Array.isArray(value.certifications)
+      ? value.certifications.map(normalizeCertification).filter((item): item is DevCertification => Boolean(item))
       : [],
     stackText: stringValue(value.stackText),
     sections,

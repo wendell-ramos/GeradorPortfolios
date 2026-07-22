@@ -10,6 +10,8 @@ export function DesktopGeneratedSite({
   desktopAreaColors,
   bio,
   contacts,
+  certifications,
+  educations,
   experiences,
   headline,
   location,
@@ -59,6 +61,8 @@ export function DesktopGeneratedSite({
   const activeDefinition = sections.find((section) => section.id === activeSection)
   const visibleProjects = projects.filter((project) => project.title.trim())
   const visibleContacts = contacts.filter((contact) => contact.value.trim() && contact.url.trim())
+  const visibleEducations = educations.filter((education) => education.institution.trim() || education.course.trim())
+  const visibleCertifications = certifications.filter((certification) => certification.name.trim() || certification.issuer.trim())
   const terminalUser = name.trim().toLowerCase().replaceAll(' ', '-') || 'dev'
   const initials = name
     .split(' ')
@@ -189,6 +193,32 @@ export function DesktopGeneratedSite({
             {stack.map((item, index) => (
               <span key={item}><small>{String(index + 1).padStart(2, '0')}</small>{item}</span>
             ))}
+          </div>
+        </div>
+      )
+    }
+
+    if (activeSection === 'education') {
+      return (
+        <div className="desktop-copy-content desktop-structured-content">
+          <p className="desktop-window-kicker">Trajetoria academica</p>
+          <h2>Formacao</h2>
+          {visibleEducations.length === 0 && <DesktopEmptyState message="Nenhuma formacao adicionada." />}
+          <div className="desktop-structured-list">
+            {visibleEducations.map((education) => <article key={education.id}><span>{education.current ? 'EM ANDAMENTO' : education.endYear || 'FORMACAO'}</span><div><h3>{education.course || 'Curso nao informado'}</h3><strong>{education.institution || 'Instituicao nao informada'}</strong><p>{[education.degree, education.location, [education.startYear, education.current ? 'Atual' : education.endYear].filter(Boolean).join(' - ')].filter(Boolean).join(' / ')}</p></div></article>)}
+          </div>
+        </div>
+      )
+    }
+
+    if (activeSection === 'certifications') {
+      return (
+        <div className="desktop-copy-content desktop-structured-content">
+          <p className="desktop-window-kicker">Credenciais profissionais</p>
+          <h2>Cursos e certificados</h2>
+          {visibleCertifications.length === 0 && <DesktopEmptyState message="Nenhum certificado adicionado." />}
+          <div className="desktop-structured-list">
+            {visibleCertifications.map((certification) => <article key={certification.id}><span>{certification.issueDate || 'CERTIFICADO'}</span><div><h3>{certification.name || 'Certificacao'}</h3><strong>{certification.issuer || 'Instituicao nao informada'}</strong>{certification.credentialId && <p>Credencial: {certification.credentialId}</p>}{certification.credentialUrl && <a href={certification.credentialUrl} rel="noreferrer" target="_blank">Ver credencial</a>}</div></article>)}
           </div>
         </div>
       )
