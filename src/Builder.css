@@ -702,6 +702,28 @@
   gap: 7px;
 }
 
+.field-error {
+  margin: 0;
+  color: var(--pf-danger);
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.flow-shell .has-error input:not([type="checkbox"]):not([type="color"]):not([type="file"]),
+.flow-shell .has-error textarea,
+.flow-shell .has-error select,
+.flow-shell input[aria-invalid="true"],
+.flow-shell textarea[aria-invalid="true"] {
+  border-color: var(--pf-danger);
+}
+
+.flow-shell .has-error input:not([type="checkbox"]):not([type="color"]):not([type="file"]):focus,
+.flow-shell .has-error textarea:focus,
+.flow-shell .has-error select:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pf-danger) 18%, transparent);
+}
+
 .form-block > label,
 .template-option-field > span,
 .section-template-field > span,
@@ -1143,6 +1165,10 @@
   margin: 7px 0 0;
   color: var(--pf-danger);
   font-size: 10px;
+}
+
+.resume-validation-error {
+  margin-top: 7px;
 }
 
 /* Experience editor */
@@ -2050,8 +2076,13 @@
 
 .project-editor > .item-heading,
 .project-editor > .project-image-field,
-.project-editor > .landing-project-details {
+.project-editor > .landing-project-details,
+.project-editor > .project-links-error {
   grid-column: 1 / -1;
+}
+
+.project-links-error {
+  margin-top: 8px;
 }
 
 .project-image-field {

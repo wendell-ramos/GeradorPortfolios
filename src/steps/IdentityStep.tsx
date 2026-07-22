@@ -1,6 +1,7 @@
 import { useEffect, useId, useState, type ChangeEvent } from 'react'
 import { BriefcaseBusiness, CalendarRange, ChevronDown, ChevronUp, FileText, ImagePlus, Plus, Trash2 } from 'lucide-react'
 import type { DevExperience } from '../models/portfolio'
+import type { IdentityValidation } from '../utils/validation'
 import { FormSection, StepBlock, TextArea, TextInput } from '../components/BuilderUI'
 import { IdentityMiniPreview } from '../components/PortfolioPreviews'
 
@@ -8,6 +9,7 @@ interface IdentityStepProps {
   addExperience: () => void
   bio: string
   experiences: DevExperience[]
+  validationErrors: IdentityValidation
   handleProfilePhoto: (event: ChangeEvent<HTMLInputElement>) => void
   handleResumeFile: (event: ChangeEvent<HTMLInputElement>) => void
   headline: string
@@ -54,17 +56,20 @@ const experienceYears = Array.from({ length: currentYear - 1964 }, (_, index) =>
 
 function ExperienceDateSelect({
   disabled = false,
+  error,
   label,
   onChange,
   value,
 }: {
   disabled?: boolean
+  error?: string
   label: string
   onChange: (value: string) => void
   value: string
 }) {
   const monthId = useId()
   const yearId = useId()
+  const errorId = useId()
   const [initialYear = '', initialMonth = ''] = value.split('-')
   const [selectedMonth, setSelectedMonth] = useState(initialMonth)
   const [selectedYear, setSelectedYear] = useState(initialYear)
@@ -83,7 +88,7 @@ function ExperienceDateSelect({
   }
 
   return (
-    <fieldset className="experience-date-field" disabled={disabled}>
+    <fieldset aria-describedby={error ? errorId : undefined} className={`experience-date-field${error ? ' has-error' : ''}`} disabled={disabled}>
       <legend>{label}</legend>
       <div className="experience-date-controls">
         <label htmlFor={monthId}>Mes</label>
@@ -99,6 +104,7 @@ function ExperienceDateSelect({
           {experienceYears.map((yearOption) => <option key={yearOption} value={yearOption}>{yearOption}</option>)}
         </select>
       </div>
+      {error && <p className="field-error" id={errorId} role="alert">{error}</p>}
     </fieldset>
   )
 }
@@ -107,6 +113,7 @@ export function IdentityStep({
   addExperience,
   bio,
   experiences,
+  validationErrors,
   handleProfilePhoto,
   handleResumeFile,
   headline,
@@ -140,16 +147,16 @@ export function IdentityStep({
   >
     <FormSection description="As informacoes que identificam voce logo no primeiro contato." icon="profile" title="Perfil principal">
       <div className="identity-field-grid">
-        <TextInput label="Nome" onChange={setName} placeholder="Ex.: Wendell Ramos" value={name} />
-        <TextInput label="Cargo / assinatura" onChange={setRole} placeholder="Ex.: Desenvolvedor de Sistemas" value={role} />
+        <TextInput error={validationErrors.fields.name} label="Nome" onChange={setName} placeholder="Ex.: Wendell Ramos" value={name} />
+        <TextInput error={validationErrors.fields.role} label="Cargo / assinatura" onChange={setRole} placeholder="Ex.: Desenvolvedor de Sistemas" value={role} />
         <div className="identity-location-field"><TextInput label="Localizacao" onChange={setLocation} placeholder="Ex.: Presidente Prudente - SP" value={location} /></div>
       </div>
     </FormSection>
 
     <FormSection description="Construa a mensagem que apresenta seu trabalho e sua trajetoria." title="Sua apresentacao">
       <div className="identity-story-grid">
-        <TextArea label="Chamada principal" onChange={setHeadline} placeholder="Resuma em uma frase o que voce cria e para quem." rows={3} value={headline} />
-        <TextArea label="Resumo sobre voce" onChange={setBio} placeholder="Conte sua trajetoria, seus interesses e seu foco profissional." rows={5} value={bio} />
+        <TextArea error={validationErrors.fields.headline} label="Chamada principal" onChange={setHeadline} placeholder="Resuma em uma frase o que voce cria e para quem." rows={3} value={headline} />
+        <TextArea error={validationErrors.fields.bio} label="Resumo sobre voce" onChange={setBio} placeholder="Conte sua trajetoria, seus interesses e seu foco profissional." rows={5} value={bio} />
       </div>
       <div className="profile-photo-field">
         <div className="profile-photo-copy">
@@ -204,6 +211,7 @@ export function IdentityStep({
               {resumeFile && <button aria-label="Remover curriculo" onClick={removeResumeFile} type="button"><Trash2 aria-hidden="true" /></button>}
             </div>
             {resumeFileError && <p className="resume-file-error" role="alert">{resumeFileError}</p>}
+            {validationErrors.fields.resumeFile && <p className="field-error resume-validation-error" role="alert">{validationErrors.fields.resumeFile}</p>}
           </>
         ) : (
           <div className="resume-disabled-note">
@@ -242,9 +250,9 @@ export function IdentityStep({
               </div>
             </div>
             <div className="experience-fields">
-              <TextInput label="Empresa" onChange={(value) => updateExperience(item.id, 'company', value)} placeholder="Ex.: Empresa ou projeto independente" value={item.company} />
+              <TextInput error={validationErrors.experiences[item.id]?.company} label="Empresa" onChange={(value) => updateExperience(item.id, 'company', value)} placeholder="Ex.: Empresa ou projeto independente" value={item.company} />
               <TextInput label="Cidade" onChange={(value) => updateExperience(item.id, 'city', value)} placeholder="Ex.: Sao Paulo - SP ou Remoto" value={item.city} />
-              <TextInput label="Cargo" onChange={(value) => updateExperience(item.id, 'role', value)} placeholder="Ex.: Desenvolvedor Front-end" value={item.role} />
+              <TextInput error={validationErrors.experiences[item.id]?.role} label="Cargo" onChange={(value) => updateExperience(item.id, 'role', value)} placeholder="Ex.: Desenvolvedor Front-end" value={item.role} />
               <TextArea label="Atividades realizadas" onChange={(value) => updateExperience(item.id, 'activities', value)} placeholder="Descreva responsabilidades, entregas e resultados." rows={3} value={item.activities} />
               <section className="experience-period">
                 <div className="experience-period-heading">
@@ -252,8 +260,8 @@ export function IdentityStep({
                   <div><strong>Periodo da experiencia</strong><small>Informe quando esse trabalho aconteceu.</small></div>
                 </div>
                 <div className="experience-period-fields">
-                  <ExperienceDateSelect label="Inicio" onChange={(value) => updateExperience(item.id, 'startDate', value)} value={item.startDate} />
-                  <ExperienceDateSelect disabled={item.current} label="Termino" onChange={(value) => updateExperience(item.id, 'endDate', value)} value={item.endDate} />
+                  <ExperienceDateSelect error={validationErrors.experiences[item.id]?.startDate} label="Inicio" onChange={(value) => updateExperience(item.id, 'startDate', value)} value={item.startDate} />
+                  <ExperienceDateSelect disabled={item.current} error={validationErrors.experiences[item.id]?.endDate} label="Termino" onChange={(value) => updateExperience(item.id, 'endDate', value)} value={item.endDate} />
                   <label className="experience-current-field">
                     <input checked={item.current} onChange={(event) => updateExperience(item.id, 'current', event.target.checked)} type="checkbox" />
                     <span><strong>Trabalho atualmente aqui</strong><small>O termino fica definido como atual.</small></span>

@@ -2,6 +2,7 @@ import type { ChangeEvent } from 'react'
 import type { DevProject, DevTemplate } from '../models/portfolio'
 import { StepBlock, TextArea, TextInput } from '../components/BuilderUI'
 import { ProjectsMiniPreview, TemplateEditorBanner } from '../components/PortfolioPreviews'
+import type { ProjectValidation } from '../utils/validation'
 
 interface ProjectsStepProps {
   addProject: () => void
@@ -9,6 +10,7 @@ interface ProjectsStepProps {
   moveProject: (id: string, direction: -1 | 1) => void
   projectImageErrors: Record<string, string>
   projects: DevProject[]
+  validationErrors: ProjectValidation
   removeProject: (id: string) => void
   removeProjectImage: (id: string) => void
   template: DevTemplate
@@ -21,6 +23,7 @@ export function ProjectsStep({
   moveProject,
   projectImageErrors,
   projects,
+  validationErrors,
   removeProject,
   removeProjectImage,
   template,
@@ -51,12 +54,14 @@ export function ProjectsStep({
             </div>
           </div>
           <TextInput
+            error={validationErrors.items[project.id]?.title}
             label="Nome do projeto"
             onChange={(value) => updateProject(project.id, 'title', value)}
             placeholder="Ex.: Sistema de reservas"
             value={project.title}
           />
           <TextArea
+            error={validationErrors.items[project.id]?.description}
             label="Descricao"
             onChange={(value) => updateProject(project.id, 'description', value)}
             placeholder="Descreva o problema, a solucao e o resultado."
@@ -121,17 +126,22 @@ export function ProjectsStep({
             )}
           </div>}
           <TextInput
+            error={validationErrors.items[project.id]?.liveUrl}
             label="Link publicado"
             onChange={(value) => updateProject(project.id, 'liveUrl', value)}
             placeholder="https://meu-projeto.com"
             value={project.liveUrl}
           />
           <TextInput
+            error={validationErrors.items[project.id]?.repoUrl}
             label="Repositorio"
             onChange={(value) => updateProject(project.id, 'repoUrl', value)}
             placeholder="https://github.com/usuario/projeto"
             value={project.repoUrl}
           />
+          {validationErrors.items[project.id]?.links && (
+            <p className="field-error project-links-error" role="alert">{validationErrors.items[project.id]?.links}</p>
+          )}
           <TextInput
             label="Tecnologias"
             onChange={(value) => updateProject(project.id, 'techs', value)}

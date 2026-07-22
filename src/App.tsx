@@ -15,9 +15,9 @@ import type {
   SectionIcon,
   TemplateSettings,
 } from './models/portfolio'
-import { writePortfolioDraft } from './storage/portfolioDraft'
 import { usePortfolioDraftPersistence } from './hooks/usePortfolioDraftPersistence'
 import { moveById, terminalSlug } from './utils/portfolio'
+import { validateContacts, validateIdentity, validateProjects } from './utils/validation'
 import { PortfyBrand, ProjectStartScreen } from './components/BuilderUI'
 import { GeneratedDevSite } from './components/GeneratedDevSite'
 import { IdentityStep } from './steps/IdentityStep'
@@ -233,7 +233,7 @@ function App() {
     }
   ), [accentColor, bio, contacts, desktopAreaColors, experiences, headline, location, maxUnlockedStep, name, profilePhoto, projects, resumeEnabled, resumeFile, resumeName, role, sections, stackText, step, template, templateBackgrounds, templateSettings])
 
-  const { draftReady, draftStatus, setDraftStatus } = usePortfolioDraftPersistence({
+  const { draftErrorReason, draftReady, draftStatus, saveNow } = usePortfolioDraftPersistence({
     currentDraft,
     onRestore: restoreDraft,
     setupComplete,
@@ -252,33 +252,23 @@ function App() {
   const currentIndex = steps.findIndex((item) => item.id === step)
   const projectsRequired = enabledSections.some((section) => section.id === 'projects')
   const contactsRequired = enabledSections.some((section) => section.id === 'contact')
-  const identityComplete = Boolean(name.trim() && role.trim() && headline.trim() && bio.trim())
-  const projectsComplete = !projectsRequired || (
-    projects.length > 0
-    && projects.every((project) => (
-      project.title.trim()
-      && project.description.trim()
-      && (project.liveUrl.trim() || project.repoUrl.trim())
-    ))
-  )
-  const contactsComplete = !contactsRequired || (
-    contacts.length > 0
-    && contacts.every((contact) => contact.value.trim() && contact.url.trim())
-  )
+  const identityValidation = validateIdentity({ bio, experiences, headline, name, resumeEnabled, resumeFile, role })
+  const projectValidation = validateProjects(projects, projectsRequired)
+  const contactValidation = validateContacts(contacts, contactsRequired)
   const stepCompletion: Record<BuilderStep, boolean> = {
-    identity: identityComplete,
+    identity: identityValidation.valid,
     style: true,
     sections: enabledSections.length > 0,
-    projects: projectsComplete,
-    contact: contactsComplete,
+    projects: projectValidation.valid,
+    contact: contactValidation.valid,
     preview: true,
   }
   const stepErrorMessages: Record<BuilderStep, string> = {
-    identity: 'Preencha nome, cargo, chamada principal e resumo para continuar.',
+    identity: 'Revise os campos indicados para continuar.',
     style: 'Escolha o estilo do portfolio para continuar.',
     sections: 'Mantenha ao menos uma secao ativa para continuar.',
-    projects: 'Preencha titulo, descricao e pelo menos um link em cada projeto.',
-    contact: 'Preencha o identificador e o link de cada contato adicionado.',
+    projects: 'Revise os projetos e seus links para continuar.',
+    contact: 'Revise os contatos e seus links para continuar.',
     preview: '',
   }
 
@@ -512,14 +502,10 @@ function App() {
   }
 
   async function exitToStart() {
-    setDraftStatus('saving')
-    try {
-      await writePortfolioDraft(currentDraft)
-      setDraftStatus('saved')
+    const saved = await saveNow()
+    if (saved) {
       setSiteMode(false)
       setSetupComplete(false)
-    } catch {
-      setDraftStatus('error')
     }
   }
 
@@ -650,7 +636,17 @@ function App() {
         <div className="flow-header-actions">
           <span className={`draft-status is-${draftStatus}`} aria-live="polite">
             {draftStatus === 'saved' ? <Check aria-hidden="true" /> : <i />}
-            {draftStatus === 'saving' ? 'Salvando...' : draftStatus === 'error' ? 'Falha ao salvar' : 'Rascunho salvo'}
+            {draftStatus === 'saving'
+              ? 'Salvando...'
+              : draftStatus === 'error'
+                ? draftErrorReason === 'quota'
+                  ? 'Armazenamento cheio'
+                  : draftErrorReason === 'blocked'
+                    ? 'Armazenamento ocupado'
+                    : draftErrorReason === 'unavailable'
+                      ? 'Salvamento indisponivel'
+                      : 'Falha ao salvar'
+                : 'Rascunho salvo'}
           </span>
           <button className="ghost-button" onClick={exitToStart} type="button"><LogOut aria-hidden="true" />Sair</button>
           {(builderFlowMode === 'free' || maxUnlockedStep >= steps.length - 1) && (
@@ -683,6 +679,7 @@ function App() {
             addExperience={addExperience}
             bio={bio}
             experiences={experiences}
+            validationErrors={showStepError ? identityValidation : { valid: true, fields: {}, experiences: {} }}
             handleProfilePhoto={handleProfilePhoto}
             handleResumeFile={handleResumeFile}
             headline={headline}
@@ -756,6 +753,7 @@ function App() {
             moveProject={moveProject}
             projectImageErrors={projectImageErrors}
             projects={projects}
+            validationErrors={showStepError ? projectValidation : { valid: true, items: {} }}
             removeProject={removeProject}
             removeProjectImage={removeProjectImage}
             template={template}
@@ -768,6 +766,7 @@ function App() {
             contacts={contacts}
             removeContact={removeContact}
             template={template}
+            validationErrors={showStepError ? contactValidation : { valid: true, items: {} }}
             updateContact={updateContact}
             updateContactType={updateContactType}
           />

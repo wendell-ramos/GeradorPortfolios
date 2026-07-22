@@ -6363,6 +6363,11 @@
   }
 }
 
+.generated-site-mode :where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
 /* Creative landing generated site */
 .generated-site-landing {
   min-height: 100dvh;

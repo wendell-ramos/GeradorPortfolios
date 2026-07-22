@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PortfolioDraft } from '../models/portfolio'
-import { readPortfolioDraft, writePortfolioDraft } from '../storage/portfolioDraft'
+import { getDraftStorageErrorReason, readPortfolioDraft, writePortfolioDraft } from '../storage/portfolioDraft'
+import type { DraftStorageErrorReason } from '../storage/portfolioDraft'
 
 export type DraftStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -17,11 +17,32 @@ export function usePortfolioDraftPersistence({
   setupComplete,
 }: PortfolioDraftPersistenceOptions): {
   draftReady: boolean
+  draftErrorReason: DraftStorageErrorReason | null
   draftStatus: DraftStatus
-  setDraftStatus: Dispatch<SetStateAction<DraftStatus>>
+  saveNow: () => Promise<boolean>
 } {
   const [draftReady, setDraftReady] = useState(false)
   const [draftStatus, setDraftStatus] = useState<DraftStatus>('idle')
+  const [draftErrorReason, setDraftErrorReason] = useState<DraftStorageErrorReason | null>(null)
+  const saveSequence = useRef(0)
+
+  const persistDraft = useCallback(async (draft: PortfolioDraft) => {
+    const sequence = ++saveSequence.current
+    setDraftStatus('saving')
+    setDraftErrorReason(null)
+
+    try {
+      await writePortfolioDraft(draft)
+      if (sequence === saveSequence.current) setDraftStatus('saved')
+      return true
+    } catch (error) {
+      if (sequence === saveSequence.current) {
+        setDraftErrorReason(getDraftStorageErrorReason(error))
+        setDraftStatus('error')
+      }
+      return false
+    }
+  }, [])
 
   useEffect(() => {
     let active = true
@@ -32,8 +53,11 @@ export function usePortfolioDraftPersistence({
         onRestore(draft)
         setDraftStatus('saved')
       })
-      .catch(() => {
-        if (active) setDraftStatus('error')
+      .catch((error) => {
+        if (active) {
+          setDraftErrorReason(getDraftStorageErrorReason(error))
+          setDraftStatus('error')
+        }
       })
       .finally(() => {
         if (active) setDraftReady(true)
@@ -47,15 +71,14 @@ export function usePortfolioDraftPersistence({
   useEffect(() => {
     if (!draftReady || !setupComplete) return
 
-    setDraftStatus('saving')
     const timeout = window.setTimeout(() => {
-      writePortfolioDraft(currentDraft)
-        .then(() => setDraftStatus('saved'))
-        .catch(() => setDraftStatus('error'))
+      void persistDraft(currentDraft)
     }, 500)
 
     return () => window.clearTimeout(timeout)
-  }, [currentDraft, draftReady, setupComplete])
+  }, [currentDraft, draftReady, persistDraft, setupComplete])
 
-  return { draftReady, draftStatus, setDraftStatus }
+  const saveNow = useCallback(() => persistDraft(currentDraft), [currentDraft, persistDraft])
+
+  return { draftReady, draftErrorReason, draftStatus, saveNow }
 }

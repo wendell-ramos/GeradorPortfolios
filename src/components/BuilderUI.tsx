@@ -87,12 +87,14 @@ export function FormSection({ children, description, icon = 'document', title }:
   )
 }
 
-export function TextInput({ label, onChange, placeholder, value }: { label: string; onChange: (value: string) => void; placeholder?: string; value: string }) {
+export function TextInput({ error, label, onChange, placeholder, value }: { error?: string; label: string; onChange: (value: string) => void; placeholder?: string; value: string }) {
   const id = useId()
-  return <div className="form-block"><label htmlFor={id}>{label}</label><input id={id} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} value={value} /></div>
+  const errorId = `${id}-error`
+  return <div className={`form-block${error ? ' has-error' : ''}`}><label htmlFor={id}>{label}</label><input aria-describedby={error ? errorId : undefined} aria-invalid={Boolean(error)} id={id} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} value={value} />{error && <p className="field-error" id={errorId} role="alert">{error}</p>}</div>
 }
 
-export function TextArea({ label, onChange, placeholder, rows, value }: { label: string; onChange: (value: string) => void; placeholder?: string; rows: number; value: string }) {
+export function TextArea({ error, label, onChange, placeholder, rows, value }: { error?: string; label: string; onChange: (value: string) => void; placeholder?: string; rows: number; value: string }) {
   const id = useId()
-  return <div className="form-block"><label htmlFor={id}>{label}</label><textarea id={id} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={rows} value={value} /></div>
+  const errorId = `${id}-error`
+  return <div className={`form-block${error ? ' has-error' : ''}`}><label htmlFor={id}>{label}</label><textarea aria-describedby={error ? errorId : undefined} aria-invalid={Boolean(error)} id={id} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} rows={rows} value={value} />{error && <p className="field-error" id={errorId} role="alert">{error}</p>}</div>
 }

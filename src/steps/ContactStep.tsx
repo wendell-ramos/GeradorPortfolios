@@ -3,12 +3,14 @@ import { contactPresets } from '../data/devPortfolioDefaults'
 import { StepBlock, TextInput } from '../components/BuilderUI'
 import { ContactIcon } from '../components/PortfolioIcons'
 import { ContactsMiniPreview, TemplateEditorBanner } from '../components/PortfolioPreviews'
+import type { ContactValidation } from '../utils/validation'
 
 interface ContactStepProps {
   addPresetContact: (preset: Omit<ContactLink, 'id'>) => void
   contacts: ContactLink[]
   removeContact: (id: string) => void
   template: DevTemplate
+  validationErrors: ContactValidation
   updateContact: (id: string, field: keyof ContactLink, value: string) => void
   updateContactType: (id: string, type: ContactType) => void
 }
@@ -18,6 +20,7 @@ export function ContactStep({
   contacts,
   removeContact,
   template,
+  validationErrors,
   updateContact,
   updateContactType,
 }: ContactStepProps) {
@@ -69,12 +72,14 @@ export function ContactStep({
             </select>
           </div>
           <TextInput
+            error={validationErrors.items[contact.id]?.value}
             label="Texto exibido"
             onChange={(value) => updateContact(contact.id, 'value', value)}
             placeholder={contactPresets.find((preset) => preset.type === contact.type)?.value}
             value={contact.value}
           />
           <TextInput
+            error={validationErrors.items[contact.id]?.url}
             label="URL"
             onChange={(value) => updateContact(contact.id, 'url', value)}
             placeholder={contactPresets.find((preset) => preset.type === contact.type)?.url}

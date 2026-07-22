@@ -171,21 +171,21 @@ export function DocsGeneratedSite({
   return (
     <section className={`docs-generated-site docs-content-${templateSettings.docs.contentWidth} ${templateSettings.docs.showPageIndex ? 'has-page-index' : 'without-page-index'}`} style={style}>
       <header className="docs-site-header">
-        <button aria-expanded={mobileMenuOpen} aria-label="Abrir navegacao" className="docs-mobile-menu" onClick={() => setMobileMenuOpen((current) => !current)} type="button"><span /><span /><span /></button>
+        <button aria-controls="docs-sidebar-navigation" aria-expanded={mobileMenuOpen} aria-label={mobileMenuOpen ? 'Fechar navegacao' : 'Abrir navegacao'} className="docs-mobile-menu" onClick={() => setMobileMenuOpen((current) => !current)} type="button"><span /><span /><span /></button>
         <button className="docs-brand" onClick={() => openPage('overview')} type="button"><strong>{name || 'Portfolio'}</strong><span>{templateSettings.docs.badge || 'Docs'}</span></button>
         <div className="docs-header-context"><span>{activePageDefinition.group}</span><b>/</b><strong>{activePageDefinition.label}</strong></div>
         <span className="docs-version">{templateSettings.docs.version || 'v1.0'}</span>
       </header>
 
       <div className="docs-site-layout">
-        <aside className={mobileMenuOpen ? 'docs-sidebar is-open' : 'docs-sidebar'}>
+        <aside className={mobileMenuOpen ? 'docs-sidebar is-open' : 'docs-sidebar'} id="docs-sidebar-navigation">
           <div className="docs-sidebar-intro"><span>{templateSettings.docs.sidebarLabel || 'DOCUMENTATION'}</span><strong>{role || 'Developer portfolio'}</strong></div>
           <nav aria-label="Paginas da documentacao">
             {groups.map((group) => <div className="docs-nav-group" key={group}><p>{group}</p>{docsPages.filter((page) => page.group === group).map((page) => <button className={activePage === page.id ? 'is-active' : ''} key={page.id} onClick={() => openPage(page.id)} type="button"><span>{page.label}</span><b aria-hidden="true">{activePage === page.id ? '-' : ''}</b></button>)}</div>)}
           </nav>
           <footer><span className="is-online" />Portfolio atualizado</footer>
         </aside>
-        {mobileMenuOpen && <button aria-label="Fechar navegacao" className="docs-sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} type="button" />}
+        {mobileMenuOpen && <button aria-label="Fechar navegacao ao clicar fora" className="docs-sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} type="button" />}
 
         <main className="docs-main-content" id="docs-page-top">{renderPage()}<footer className="docs-page-footer"><span>{name || 'Portfolio'}</span><button onClick={() => openPage('overview')} type="button">Voltar ao inicio</button></footer></main>
 
