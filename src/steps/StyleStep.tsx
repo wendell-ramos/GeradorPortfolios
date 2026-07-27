@@ -13,6 +13,7 @@ import { ColorMiniPreview, TemplateMiniPreview } from '../components/PortfolioPr
 
 interface StyleStepProps {
   accentColor: string
+  customizationLocked: boolean
   setAccentColor: (color: string) => void
   setTemplate: (template: DevTemplate) => void
   setTemplateBackgrounds: Dispatch<SetStateAction<Record<DevTemplate, string>>>
@@ -24,6 +25,7 @@ interface StyleStepProps {
 
 export function StyleStep({
   accentColor,
+  customizationLocked,
   setAccentColor,
   setTemplate,
   setTemplateBackgrounds,
@@ -53,6 +55,7 @@ export function StyleStep({
       ))}
     </div>
 
+    <fieldset className="style-customization-lock-surface" disabled={customizationLocked}>
     <div className="color-row" aria-label="Cores de destaque">
       {accentOptions.map((color) => (
         <button
@@ -195,6 +198,7 @@ export function StyleStep({
         </div>
       )}
     </div>
+    </fieldset>
 
   </StepBlock>
   )

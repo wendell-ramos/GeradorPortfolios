@@ -64,11 +64,13 @@ describe('portfolio builder flow', () => {
 
     const terminalTemplate = screen.getByRole('button', { name: /Terminal hacker/ })
     expect(terminalTemplate).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Usar cor #2563eb' })).toBeDisabled()
 
     await user.click(terminalTemplate)
 
     expect(screen.getByText('Ambiente do terminal')).toBeInTheDocument()
     expect(terminalTemplate).toHaveClass('is-active')
+    expect(screen.getByRole('textbox', { name: 'Nome do ambiente' })).toBeDisabled()
   })
 
   it('restores the saved step and template from IndexedDB', async () => {

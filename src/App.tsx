@@ -867,6 +867,7 @@ function App() {
         {step === 'style' && (
           <StyleStep
             accentColor={accentColor}
+            customizationLocked={exampleDataLocked}
             setAccentColor={setAccentColor}
             setTemplate={setTemplate}
             setTemplateBackgrounds={setTemplateBackgrounds}

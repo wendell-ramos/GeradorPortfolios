@@ -3587,6 +3587,21 @@
   cursor: not-allowed;
 }
 
+.style-customization-lock-surface {
+  width: min(100%, 1120px);
+  min-width: 0;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+}
+
+.style-customization-lock-surface:disabled input,
+.style-customization-lock-surface:disabled select,
+.style-customization-lock-surface:disabled button {
+  opacity: 1;
+  cursor: not-allowed;
+}
+
 .flow-card > .example-data-lock-surface > .step-block,
 .flow-card > .example-data-lock-surface > .step-block.is-wide {
   width: 100% !important;
