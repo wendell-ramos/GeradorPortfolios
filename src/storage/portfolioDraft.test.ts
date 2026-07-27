@@ -82,6 +82,22 @@ describe('portfolio draft storage', () => {
     expect(normalized?.availability).toEqual({ status: '', workModels: '', opportunityTypes: '', note: '' })
   })
 
+  it('converts a legacy stack text into an uncategorized group', () => {
+    const legacyDraft = {
+      ...createDraft(),
+      stackText: 'React\nTypeScript',
+      stackGroups: undefined,
+    }
+
+    const normalized = normalizePortfolioDraft(legacyDraft)
+
+    expect(normalized?.stackGroups).toHaveLength(1)
+    expect(normalized?.stackGroups[0]).toMatchObject({
+      category: '',
+      technologies: 'React\nTypeScript',
+    })
+  })
+
   it('ignores malformed values instead of exposing them to the app', () => {
     expect(normalizePortfolioDraft(null)).toBeNull()
     expect(normalizePortfolioDraft('invalid draft')).toBeNull()

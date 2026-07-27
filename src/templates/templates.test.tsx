@@ -33,9 +33,15 @@ describe('generated templates', () => {
 
   it('groups the Desktop stack by technical area', () => {
     vi.useFakeTimers()
+    const stackGroups = [
+      { id: 'front', category: 'Front-end', technologies: 'React' },
+      { id: 'back', category: 'Back-end & APIs', technologies: 'ASP.NET MVC' },
+      { id: 'data', category: 'Dados & cloud', technologies: 'PostgreSQL' },
+      { id: 'tools', category: 'Ferramentas', technologies: 'Git e GitHub' },
+    ]
     render(
       <DesktopGeneratedSite
-        {...createPreviewProps({ stack: ['React', 'ASP.NET MVC', 'PostgreSQL', 'Git e GitHub'], template: 'desktop' })}
+        {...createPreviewProps({ stack: ['React', 'ASP.NET MVC', 'PostgreSQL', 'Git e GitHub'], stackGroups, template: 'desktop' })}
         onBackgroundColorChange={() => undefined}
         onDesktopAreaColorChange={() => undefined}
       />,
@@ -48,6 +54,22 @@ describe('generated templates', () => {
     expect(screen.getByRole('heading', { name: 'Back-end & APIs' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Dados & cloud' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Ferramentas' })).toBeInTheDocument()
+  })
+
+  it('preserves stack categories in Terminal, Docs and Landing templates', () => {
+    const stackGroups = [{ id: 'front', category: 'Front-end', technologies: 'React\nTypeScript' }]
+    const props = createPreviewProps({ stack: ['React', 'TypeScript'], stackGroups })
+
+    const { rerender } = render(<TerminalGeneratedSite {...props} template="terminal" />)
+    fireEvent.click(screen.getByRole('button', { name: 'stack' }))
+    expect(screen.getByText('./front-end')).toBeInTheDocument()
+
+    rerender(<DocsGeneratedSite {...props} template="docs" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Stack' }))
+    expect(screen.getByRole('heading', { name: 'Front-end' })).toBeInTheDocument()
+
+    rerender(<LandingGeneratedSite {...props} template="landing" />)
+    expect(screen.getAllByText('Front-end').length).toBeGreaterThan(0)
   })
 
   it('organizes all Desktop shortcuts into multiple columns', () => {
@@ -155,6 +177,7 @@ describe('generated templates', () => {
       resumeFile: '',
       sections: [],
       stack: [],
+      stackGroups: [],
     })
 
     const { rerender } = render(<TerminalGeneratedSite {...emptyProps} template="terminal" />)

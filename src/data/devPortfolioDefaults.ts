@@ -1,4 +1,4 @@
-import type { BuilderStep, ContactLink, DefaultSection, DesktopColorTarget, DesktopEditableTarget, DevAvailability, DevCertification, DevEducation, DevExperience, DevLanguage, DevProject, DevService, DevTemplate, DevTemplateOption, DevTestimonial, PortfolioSection, SectionIcon, TemplateSettings } from '../models/portfolio'
+import type { BuilderStep, ContactLink, DefaultSection, DesktopColorTarget, DesktopEditableTarget, DevAvailability, DevCertification, DevEducation, DevExperience, DevLanguage, DevProject, DevService, DevStackGroup, DevTemplate, DevTemplateOption, DevTestimonial, PortfolioSection, SectionIcon, TemplateSettings } from '../models/portfolio'
 
 const exampleResumeUrl = `${import.meta.env.BASE_URL}examples/curriculo-wendell-ramos.pdf`
 const exampleProfilePhotoUrl = `${import.meta.env.BASE_URL}examples/perfil-exemplo.svg`
@@ -130,6 +130,12 @@ export function createPresetDevPortfolio() {
     { id: crypto.randomUUID(), type: 'portfolio', label: 'Portfolio', value: 'wendell-ramos.github.io/portfolio-wendell-ramos', url: 'https://wendell-ramos.github.io/portfolio-wendell-ramos/' },
   ]
 
+  const stackGroups: DevStackGroup[] = [
+    { id: 'example-stack-front-end', category: 'Front-end', technologies: 'React\nTypeScript' },
+    { id: 'example-stack-back-end', category: 'Back-end & APIs', technologies: 'ASP.NET MVC\nC#' },
+    { id: 'example-stack-data-cloud', category: 'Dados & cloud', technologies: 'PostgreSQL\nCloudflare' },
+  ]
+
   return {
     exampleDataLocked: true,
     template: 'desktop' as DevTemplate,
@@ -155,6 +161,7 @@ export function createPresetDevPortfolio() {
     testimonials,
     availability,
     stackText: 'React\nTypeScript\nASP.NET MVC\nC#\nPostgreSQL\nCloudflare',
+    stackGroups,
     sections: createDefaultSections(),
     projects,
     contacts,

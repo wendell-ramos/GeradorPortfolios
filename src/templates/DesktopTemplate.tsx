@@ -48,6 +48,7 @@ export function DesktopGeneratedSite({
   role,
   sections,
   stack,
+  stackGroups: savedStackGroups,
   templateSettings,
   onBackgroundColorChange,
   onDesktopAreaColorChange,
@@ -90,11 +91,18 @@ export function DesktopGeneratedSite({
   const visibleServices = services.filter((service) => service.title.trim() || service.description.trim())
   const visibleLanguages = languagesEnabled ? languages.filter((language) => language.name.trim()) : []
   const visibleTestimonials = testimonials.filter((testimonial) => testimonial.name.trim() || testimonial.quote.trim())
-  const stackGroups = desktopStackGroupDefinitions
-    .map((definition) => ({
-      ...definition,
-      items: stack.filter((item) => getDesktopStackGroup(item) === definition.id),
-    }))
+  const stackGroups = (savedStackGroups.length
+    ? savedStackGroups.map((group, index) => ({
+        id: group.id,
+        label: group.category.trim() || 'Stack principal',
+        description: group.category.trim() ? 'Tecnologias relacionadas' : 'Ferramentas e conhecimentos',
+        icon: desktopStackGroupDefinitions[index % desktopStackGroupDefinitions.length].icon,
+        items: group.technologies.split('\n').map((item) => item.trim()).filter(Boolean),
+      }))
+    : desktopStackGroupDefinitions.map((definition) => ({
+        ...definition,
+        items: stack.filter((item) => getDesktopStackGroup(item) === definition.id),
+      })))
     .filter((group) => group.items.length > 0)
   const terminalUser = name.trim().toLowerCase().replaceAll(' ', '-') || 'dev'
   const initials = name

@@ -14,6 +14,7 @@ import type {
   DevLanguage,
   DevProject,
   DevService,
+  DevStackGroup,
   DevTemplate,
   DevTestimonial,
   PortfolioDraft,
@@ -258,7 +259,7 @@ function App() {
   function updateAvailability<K extends keyof DevAvailability>(field: K, value: DevAvailability[K]) {
     setAvailability((current) => ({ ...current, [field]: value }))
   }
-  const [stackText, setStackText] = useState(initialPreset.stackText)
+  const [stackGroups, setStackGroups] = useState<DevStackGroup[]>(initialPreset.stackGroups)
   const [sections, setSections] = useState<PortfolioSection[]>(initialPreset.sections)
   const [customSectionTitle, setCustomSectionTitle] = useState('')
   const [customSectionDescription, setCustomSectionDescription] = useState('')
@@ -301,7 +302,7 @@ function App() {
     setLanguages(draft.languages)
     setTestimonials(draft.exampleDataLocked ? [] : draft.testimonials)
     setAvailability(draft.exampleDataLocked ? { status: '', workModels: '', opportunityTypes: '', note: '' } : draft.availability)
-    setStackText(draft.stackText)
+    setStackGroups(draft.exampleDataLocked ? createPresetDevPortfolio().stackGroups : draft.stackGroups)
     setSections(draft.exampleDataLocked ? draft.sections.filter((section) => !optionalExampleSectionIds.has(section.id)) : draft.sections)
     setProjects((draft.projects ?? []).map((project, index) => ({
       ...project,
@@ -313,6 +314,15 @@ function App() {
     setContacts(draft.contacts)
     setSetupComplete(true)
   }, [])
+
+  const stack = useMemo(
+    () => stackGroups.flatMap((group) => group.technologies
+      .split('\n')
+      .map((item) => item.trim())
+      .filter(Boolean)),
+    [stackGroups],
+  )
+  const stackText = useMemo(() => stack.join('\n'), [stack])
 
   const currentDraft = useMemo<PortfolioDraft>(() => (
     {
@@ -344,26 +354,18 @@ function App() {
       testimonials,
       availability,
       stackText,
+      stackGroups,
       sections,
       projects,
       contacts,
     }
-  ), [accentColor, availability, bio, certifications, contacts, desktopAreaColors, educations, exampleDataLocked, experiences, headline, languages, languagesEnabled, location, maxUnlockedStep, name, profilePhoto, projects, resumeEnabled, resumeFile, resumeName, role, sections, services, stackText, step, template, templateBackgrounds, templateSettings, testimonials])
+  ), [accentColor, availability, bio, certifications, contacts, desktopAreaColors, educations, exampleDataLocked, experiences, headline, languages, languagesEnabled, location, maxUnlockedStep, name, profilePhoto, projects, resumeEnabled, resumeFile, resumeName, role, sections, services, stackGroups, stackText, step, template, templateBackgrounds, templateSettings, testimonials])
 
   const { draftErrorReason, draftReady, draftStatus, saveNow } = usePortfolioDraftPersistence({
     currentDraft,
     onRestore: restoreDraft,
     setupComplete,
   })
-
-  const stack = useMemo(
-    () =>
-      stackText
-        .split('\n')
-        .map((item) => item.trim())
-        .filter(Boolean),
-    [stackText],
-  )
 
   const enabledSections = sections.filter((section) => section.enabled)
   const currentIndex = steps.findIndex((item) => item.id === step)
@@ -660,7 +662,7 @@ function App() {
     setLanguages([])
     setTestimonials([])
     setAvailability({ status: '', workModels: '', opportunityTypes: '', note: '' })
-    setStackText('')
+    setStackGroups([])
     setSections(createDefaultSections())
     setCustomSectionTitle('')
     setCustomSectionDescription('')
@@ -702,7 +704,7 @@ function App() {
     setLanguages(preset.languages)
     setTestimonials(preset.testimonials)
     setAvailability(preset.availability)
-    setStackText(preset.stackText)
+    setStackGroups(preset.stackGroups)
     setSections(preset.sections)
     setCustomSectionTitle('')
     setCustomSectionDescription('')
@@ -759,6 +761,7 @@ function App() {
         role={role}
         sections={enabledSections}
         stack={stack}
+        stackGroups={stackGroups}
         template={template}
         templateSettings={templateSettings}
       />
@@ -908,9 +911,11 @@ function App() {
             setCustomSectionDescription={setCustomSectionDescription}
             setCustomSectionIcon={setCustomSectionIcon}
             setCustomSectionTitle={setCustomSectionTitle}
-            setStackText={setStackText}
+            addStackGroup={() => setStackGroups((current) => [...current, { id: crypto.randomUUID(), category: '', technologies: '' }])}
+            moveStackGroup={(id, direction) => setStackGroups((current) => moveById(current, id, direction))}
+            removeStackGroup={(id) => setStackGroups((current) => current.filter((group) => group.id !== id))}
             stack={stack}
-            stackText={stackText}
+            stackGroups={stackGroups}
             template={template}
             toggleSection={toggleSection}
             updateSectionColor={updateSectionColor}
@@ -922,6 +927,7 @@ function App() {
             testimonials={testimonials}
             updateAvailability={updateAvailability}
             updateService={updateService}
+            updateStackGroup={(id, field, value) => setStackGroups((current) => current.map((group) => group.id === id ? { ...group, [field]: value } : group))}
             updateTestimonial={updateTestimonial}
           />
         )}

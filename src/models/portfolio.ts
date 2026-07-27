@@ -39,6 +39,7 @@ export type DevService = { id: string; title: string; description: string; techn
 export type DevLanguage = { id: string; name: string; level: string }
 export type DevTestimonial = { id: string; name: string; role: string; company: string; quote: string }
 export type DevAvailability = { status: string; workModels: string; opportunityTypes: string; note: string }
+export type DevStackGroup = { id: string; category: string; technologies: string }
 export type ContactType = 'email' | 'github' | 'linkedin' | 'whatsapp' | 'instagram' | 'x' | 'portfolio'
 export type ContactLink = { id: string; type: ContactType; label: string; value: string; url: string }
 export type DevTemplateOption = { id: DevTemplate; label: string; description: string }
@@ -95,6 +96,7 @@ export type PortfolioDraft = {
   testimonials: DevTestimonial[]
   availability: DevAvailability
   stackText: string
+  stackGroups: DevStackGroup[]
   sections: PortfolioSection[]
   projects: DevProject[]
   contacts: ContactLink[]
@@ -125,6 +127,7 @@ export type PortfolioPreviewProps = {
   role: string
   sections: PortfolioSection[]
   stack: string[]
+  stackGroups: DevStackGroup[]
   template: DevTemplate
   templateSettings: TemplateSettings
 }

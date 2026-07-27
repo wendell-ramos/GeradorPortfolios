@@ -28,6 +28,7 @@ export function LandingGeneratedSite({
   role,
   sections,
   stack,
+  stackGroups,
   templateSettings,
 }: PortfolioPreviewProps) {
   const enabledSections = sections.filter((section) => section.enabled)
@@ -154,14 +155,23 @@ export function LandingGeneratedSite({
             return settings.showMarquee && stack.length > 0 ? (
               <section className="landing-marquee-section" id="landing-stack" key={section.id}>
                 <span className="landing-marquee-label">{sectionIndex} / Stack principal</span>
-                <div className="landing-marquee" aria-label="Tecnologias principais">
-                  <div>{[...stack, ...stack].map((item, itemIndex) => <span key={`${item}-${itemIndex}`}>{item}<i /></span>)}</div>
+                <div className="landing-marquee landing-stack-marquee" aria-label="Tecnologias principais">
+                  <div>{[...stackGroups, ...stackGroups].flatMap((group, groupIndex) => {
+                    const technologies = group.technologies.split('\n').map((item) => item.trim()).filter(Boolean)
+                    return [
+                      <strong key={`${group.id}-label-${groupIndex}`}>{group.category.trim() || 'Stack geral'}</strong>,
+                      ...technologies.map((item, itemIndex) => <span key={`${group.id}-${item}-${groupIndex}-${itemIndex}`}>{item}<i /></span>),
+                    ]
+                  })}</div>
                 </div>
               </section>
             ) : (
               <section className="landing-section landing-stack" id="landing-stack" key={section.id}>
                 <LandingSectionHeading index={sectionIndex} label="Stack" title="Ferramentas que uso para tirar ideias do papel." />
-                <div>{stack.map((item, itemIndex) => <span key={`${item}-${itemIndex}`}><b>{String(itemIndex + 1).padStart(2, '0')}</b>{item}</span>)}</div>
+                <div className="landing-stack-groups">{stackGroups.filter((group) => group.technologies.trim()).map((group, groupIndex) => {
+                  const technologies = group.technologies.split('\n').map((item) => item.trim()).filter(Boolean)
+                  return <article key={group.id}><header><span>{String(groupIndex + 1).padStart(2, '0')}</span><h3>{group.category.trim() || 'Stack geral'}</h3><strong>{technologies.length}</strong></header><div>{technologies.map((item) => <span key={item}>{item}</span>)}</div></article>
+                })}</div>
               </section>
             )
           }

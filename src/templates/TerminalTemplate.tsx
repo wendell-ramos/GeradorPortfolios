@@ -25,6 +25,7 @@ export function TerminalGeneratedSite({
   role,
   sections,
   stack,
+  stackGroups,
   templateSettings,
 }: PortfolioPreviewProps) {
   const enabledSections = sections.filter((section) => section.enabled)
@@ -155,10 +156,20 @@ export function TerminalGeneratedSite({
 
     if (activeCommand === 'stack') {
       return (
-        <div className="terminal-list-output">
+        <div className="terminal-list-output terminal-stack-output">
           <p>Instalados em ~/skills:</p>
           {stack.filter(Boolean).length ? (
-            <ol>{stack.filter(Boolean).map((item, index) => <li key={`${item}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span>{item}</li>)}</ol>
+            <div className="terminal-stack-groups">
+              {stackGroups.filter((group) => group.technologies.trim()).map((group, groupIndex) => {
+                const technologies = group.technologies.split('\n').map((item) => item.trim()).filter(Boolean)
+                return (
+                  <section key={group.id}>
+                    <p><span>./{terminalSlug(group.category) || `group-${String(groupIndex + 1).padStart(2, '0')}`}</span></p>
+                    <ol>{technologies.map((item, index) => <li key={`${item}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span>{item}</li>)}</ol>
+                  </section>
+                )
+              })}
+            </div>
           ) : <p className="terminal-muted">0 tecnologias cadastradas.</p>}
         </div>
       )

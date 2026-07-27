@@ -84,6 +84,7 @@ export function DocsGeneratedSite({
   role,
   sections,
   stack,
+  stackGroups,
   templateSettings,
 }: PortfolioPreviewProps) {
   const enabledSections = sections.filter((section) => section.enabled)
@@ -203,8 +204,18 @@ export function DocsGeneratedSite({
   const renderStack = () => (
     <div className="docs-v2-page">
       <DocsPageHeader description="Tecnologias, ferramentas e plataformas que fazem parte do meu fluxo de desenvolvimento." eyebrow="Perfil / stack" title="Stack principal" />
-      <div className="docs-v2-stack-grid" id="docs-stack-list">
-        {stack.filter(Boolean).map((technology, index) => <article key={`${technology}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><Braces aria-hidden="true" /><strong>{technology}</strong><small><i />Em uso</small></article>)}
+      <div className="docs-v2-stack-groups" id="docs-stack-list">
+        {stackGroups.filter((group) => group.technologies.trim()).map((group, groupIndex) => {
+          const technologies = group.technologies.split('\n').map((item) => item.trim()).filter(Boolean)
+          return (
+            <section key={group.id}>
+              <header><span>{String(groupIndex + 1).padStart(2, '0')}</span><div><small>Categoria</small><h2>{group.category.trim() || 'Stack geral'}</h2></div><strong>{String(technologies.length).padStart(2, '0')}</strong></header>
+              <div className="docs-v2-stack-grid">
+                {technologies.map((technology, index) => <article key={`${technology}-${index}`}><span>{String(index + 1).padStart(2, '0')}</span><Braces aria-hidden="true" /><strong>{technology}</strong><small><i />Em uso</small></article>)}
+              </div>
+            </section>
+          )
+        })}
       </div>
       {!stack.filter(Boolean).length && <DocsEmptyState title="Nenhuma tecnologia cadastrada">A stack principal aparecera nesta pagina.</DocsEmptyState>}
     </div>

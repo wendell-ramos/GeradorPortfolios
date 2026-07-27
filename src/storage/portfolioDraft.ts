@@ -15,6 +15,7 @@ import type {
   DevLanguage,
   DevProject,
   DevService,
+  DevStackGroup,
   DevTemplate,
   DevTestimonial,
   PortfolioDraft,
@@ -132,6 +133,15 @@ function normalizeAvailability(value: unknown): DevAvailability {
   return { status: stringValue(value.status), workModels: stringValue(value.workModels), opportunityTypes: stringValue(value.opportunityTypes), note: stringValue(value.note) }
 }
 
+function normalizeStackGroup(value: unknown): DevStackGroup | null {
+  if (!isRecord(value)) return null
+  return {
+    id: stringValue(value.id, createId('stack-group')),
+    category: stringValue(value.category),
+    technologies: stringValue(value.technologies),
+  }
+}
+
 function normalizeProject(value: unknown, index: number): DevProject | null {
   if (!isRecord(value)) return null
   return {
@@ -193,6 +203,12 @@ export function normalizePortfolioDraft(value: unknown): PortfolioDraft | null {
   const sections = Array.isArray(value.sections)
     ? value.sections.map(normalizeSection).filter((item): item is PortfolioSection => Boolean(item))
     : createDefaultSections()
+  const legacyStackText = stringValue(value.stackText)
+  const stackGroups = Array.isArray(value.stackGroups)
+    ? value.stackGroups.map(normalizeStackGroup).filter((item): item is DevStackGroup => Boolean(item))
+    : legacyStackText.trim()
+      ? [{ id: createId('stack-group'), category: '', technologies: legacyStackText }]
+      : []
 
   return {
     version: 1,
@@ -250,7 +266,8 @@ export function normalizePortfolioDraft(value: unknown): PortfolioDraft | null {
       ? value.testimonials.map(normalizeTestimonial).filter((item): item is DevTestimonial => Boolean(item))
       : [],
     availability: normalizeAvailability(value.availability),
-    stackText: stringValue(value.stackText),
+    stackText: legacyStackText,
+    stackGroups,
     sections,
     projects: Array.isArray(value.projects)
       ? value.projects.map(normalizeProject).filter((item): item is DevProject => Boolean(item))

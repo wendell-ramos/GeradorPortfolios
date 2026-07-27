@@ -44,6 +44,7 @@ export function createPreviewProps(
     role: draft.role,
     sections: draft.sections,
     stack: draft.stackText.split('\n'),
+    stackGroups: draft.stackGroups,
     template: draft.template,
     templateSettings: draft.templateSettings,
     ...overrides,

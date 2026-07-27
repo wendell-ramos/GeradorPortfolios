@@ -1,4 +1,4 @@
-import type { DevAvailability, DevCertification, DevEducation, DevService, DevTemplate, DevTestimonial, PortfolioSection, SectionIcon } from '../models/portfolio'
+import type { DevAvailability, DevCertification, DevEducation, DevService, DevStackGroup, DevTemplate, DevTestimonial, PortfolioSection, SectionIcon } from '../models/portfolio'
 import { sectionIconOptions, sectionPresets } from '../data/devPortfolioDefaults'
 import { defaultSectionSurface, terminalSlug } from '../utils/portfolio'
 import { StepBlock, TextArea, TextInput } from '../components/BuilderUI'
@@ -13,6 +13,7 @@ interface SectionsStepProps {
   addCertification: () => void
   addEducation: () => void
   addService: () => void
+  addStackGroup: () => void
   addTestimonial: () => void
   availability: DevAvailability
   certifications: DevCertification[]
@@ -26,19 +27,20 @@ interface SectionsStepProps {
   moveService: (id: string, direction: -1 | 1) => void
   moveTestimonial: (id: string, direction: -1 | 1) => void
   moveSection: (id: string, direction: -1 | 1) => void
+  moveStackGroup: (id: string, direction: -1 | 1) => void
   removeSection: (id: string) => void
   removeCertification: (id: string) => void
   removeEducation: (id: string) => void
   removeService: (id: string) => void
+  removeStackGroup: (id: string) => void
   removeTestimonial: (id: string) => void
   services: DevService[]
   sections: PortfolioSection[]
   setCustomSectionDescription: (value: string) => void
   setCustomSectionIcon: (icon: SectionIcon) => void
   setCustomSectionTitle: (value: string) => void
-  setStackText: (value: string) => void
   stack: string[]
-  stackText: string
+  stackGroups: DevStackGroup[]
   template: DevTemplate
   toggleSection: (id: string) => void
   updateSectionColor: (id: string, color: string) => void
@@ -50,6 +52,7 @@ interface SectionsStepProps {
   testimonials: DevTestimonial[]
   updateAvailability: <K extends keyof DevAvailability>(field: K, value: DevAvailability[K]) => void
   updateService: <K extends keyof Omit<DevService, 'id'>>(id: string, field: K, value: DevService[K]) => void
+  updateStackGroup: <K extends keyof Omit<DevStackGroup, 'id'>>(id: string, field: K, value: DevStackGroup[K]) => void
   updateTestimonial: <K extends keyof Omit<DevTestimonial, 'id'>>(id: string, field: K, value: DevTestimonial[K]) => void
 }
 
@@ -59,6 +62,7 @@ export function SectionsStep({
   addCertification,
   addEducation,
   addService,
+  addStackGroup,
   addTestimonial,
   availability,
   certifications,
@@ -72,19 +76,20 @@ export function SectionsStep({
   moveService,
   moveTestimonial,
   moveSection,
+  moveStackGroup,
   removeSection,
   removeCertification,
   removeEducation,
   removeService,
+  removeStackGroup,
   removeTestimonial,
   services,
   sections,
   setCustomSectionDescription,
   setCustomSectionIcon,
   setCustomSectionTitle,
-  setStackText,
   stack,
-  stackText,
+  stackGroups,
   template,
   toggleSection,
   updateSectionColor,
@@ -96,6 +101,7 @@ export function SectionsStep({
   testimonials,
   updateAvailability,
   updateService,
+  updateStackGroup,
   updateTestimonial,
 }: SectionsStepProps) {
   return (
@@ -248,7 +254,43 @@ export function SectionsStep({
       </button>
     </div>
 
-    <TextArea label="Stack, uma tecnologia por linha" onChange={setStackText} placeholder={'React\nTypeScript\nPostgreSQL'} rows={6} value={stackText} />
+    <section className="stack-groups-editor">
+      <header>
+        <div>
+          <span>Stack estruturada</span>
+          <h2>Organize tecnologias por tipo</h2>
+          <p>O tipo e opcional. Sem ele, as tecnologias aparecem como uma lista geral.</p>
+        </div>
+        <button className="primary-button" onClick={addStackGroup} type="button">Adicionar grupo</button>
+      </header>
+
+      {stackGroups.length ? (
+        <div className="stack-groups-editor-list">
+          {stackGroups.map((group, index) => (
+            <article className="stack-group-editor" key={group.id}>
+              <div className="stack-group-editor-heading">
+                <span>{String(index + 1).padStart(2, '0')}</span>
+                <strong>{group.category.trim() || 'Stack geral'}</strong>
+                <div>
+                  <button aria-label="Mover grupo para cima" disabled={index === 0} onClick={() => moveStackGroup(group.id, -1)} type="button">Subir</button>
+                  <button aria-label="Mover grupo para baixo" disabled={index === stackGroups.length - 1} onClick={() => moveStackGroup(group.id, 1)} type="button">Descer</button>
+                  <button aria-label="Remover grupo de stack" onClick={() => removeStackGroup(group.id)} type="button">Remover</button>
+                </div>
+              </div>
+              <div className="stack-group-editor-fields">
+                <TextInput label="Tipo da stack (opcional)" onChange={(value) => updateStackGroup(group.id, 'category', value)} placeholder="Ex.: Front-end" value={group.category} />
+                <TextArea label="Tecnologias, uma por linha" onChange={(value) => updateStackGroup(group.id, 'technologies', value)} placeholder={'React\nTypeScript\nCSS'} rows={4} value={group.technologies} />
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="stack-groups-empty">
+          <strong>Nenhuma tecnologia adicionada</strong>
+          <p>Crie um grupo para cadastrar stacks com ou sem categoria.</p>
+        </div>
+      )}
+    </section>
     <SectionsMiniPreview sections={enabledSections} stack={stack} template={template} />
   </StepBlock>
   )
