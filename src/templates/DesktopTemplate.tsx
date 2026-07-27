@@ -501,7 +501,7 @@ export function DesktopGeneratedSite({
           {activeSection !== 'home' && (
             <div className={`desktop-window-address ${colorAreaClass('menu')}`} onClickCapture={(event) => selectColorArea(event, 'menu')}><span>Endereco</span><strong>{name} / Portfolio / {windowTitle}</strong></div>
           )}
-          <div className={`desktop-site-window-body ${colorAreaClass('window')}`} onClickCapture={(event) => selectColorArea(event, 'window')} style={activeDefinition ? sectionColorStyle(activeDefinition) : undefined}>
+          <div className={`desktop-site-window-body ${activeSection === 'home' ? 'is-home' : activeSection === 'stack' ? 'is-stack' : ''} ${colorAreaClass('window')}`} onClickCapture={(event) => selectColorArea(event, 'window')} style={activeDefinition ? sectionColorStyle(activeDefinition) : undefined}>
             {renderWindowContent()}
           </div>
           <footer className={`desktop-window-status ${colorAreaClass('statusbar')}`} onClickCapture={(event) => selectColorArea(event, 'statusbar')}>{statusText} | Clique nos atalhos para explorar</footer>

@@ -5019,9 +5019,9 @@
 .desktop-home-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.85fr);
-  gap: clamp(28px, 5vw, 70px);
+  gap: clamp(22px, 3vw, 38px);
   align-items: center;
-  min-height: 390px;
+  min-height: 0;
 }
 
 .desktop-home-layout.is-single {
@@ -5092,7 +5092,7 @@
 }
 
 .desktop-window-actions {
-  margin-top: 20px;
+  margin-top: 14px;
 }
 
 .desktop-window-actions button,
@@ -5111,20 +5111,20 @@
 .desktop-terminal-card {
   transform: rotate(1.5deg);
   border: 2px solid #111827;
-  padding: 14px;
+  padding: 10px 11px;
   color: #dbeafe;
   background: #0a1038;
   box-shadow: 8px 9px 0 rgba(15, 23, 42, 0.24);
   font-family: "Courier New", ui-monospace, monospace;
-  font-size: 0.66rem;
-  line-height: 1.55;
+  font-size: 0.59rem;
+  line-height: 1.42;
 }
 
 .desktop-terminal-card > div {
   display: flex;
   gap: 5px;
-  margin: -14px -14px 14px;
-  padding: 7px 9px;
+  margin: -10px -11px 10px;
+  padding: 6px 8px;
   background: #141b4b;
 }
 
@@ -5137,7 +5137,7 @@
 
 .desktop-terminal-card > div span:nth-child(2) { background: #f6c453; }
 .desktop-terminal-card > div span:last-child { background: #59d18c; }
-.desktop-terminal-card p { margin: 0 0 12px; }
+.desktop-terminal-card p { margin: 0 0 8px; }
 .desktop-terminal-card strong { color: #5eead4; }
 
 .desktop-terminal-card i {
@@ -6624,14 +6624,36 @@
 }
 
 .desktop-home-content h1 {
-  font-size: clamp(2.55rem, 4.25vw, 4.15rem);
-  line-height: 0.96;
+  margin: 5px 0 9px;
+  font-size: clamp(2.25rem, 3vw, 3rem);
+  line-height: 0.94;
   text-wrap: balance;
 }
 
 .desktop-home-content > p,
 .desktop-copy-content > p {
   font-size: clamp(0.84rem, 0.18vw + 0.8rem, 0.94rem);
+}
+
+.desktop-site-window-body.is-home {
+  padding: clamp(18px, 2vw, 24px);
+}
+
+@media (min-width: 281px) {
+  .desktop-site-window-body.is-home {
+    display: grid;
+    align-content: center;
+  }
+}
+
+.desktop-site-window-body.is-home .desktop-home-content > p {
+  font-size: clamp(0.76rem, 0.12vw + 0.74rem, 0.84rem);
+  line-height: 1.42;
+}
+
+.desktop-site-window-body.is-home .desktop-location {
+  margin-top: 7px;
+  font-size: 0.68rem;
 }
 
 .desktop-window-actions button,
@@ -10882,5 +10904,134 @@
 
   .docs-resume-link small {
     display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .desktop-site-window-body.is-home {
+    padding: 14px;
+  }
+
+  .desktop-site-window-body.is-home .desktop-home-content h1 {
+    font-size: 2rem;
+  }
+
+  .desktop-site-window-body.is-home .desktop-window-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin-top: 10px;
+  }
+
+  .desktop-site-window-body.is-home .desktop-window-actions button {
+    width: auto;
+    min-height: 38px;
+    padding: 5px 3px;
+    font-size: 0.58rem;
+    line-height: 1.1;
+  }
+}
+
+@media (max-width: 280px) {
+  .desktop-site-window-body.is-home .desktop-window-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 621px) {
+  .desktop-site-window-body.is-stack {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    align-content: stretch;
+    padding: clamp(14px, 1.4vw, 20px);
+  }
+
+  .desktop-stack-content {
+    grid-template-rows: auto minmax(160px, 1fr);
+    gap: 12px;
+    height: 100%;
+    min-height: 100%;
+  }
+
+  .desktop-stack-intro {
+    gap: 16px;
+    padding-bottom: 10px;
+  }
+
+  .desktop-stack-intro h2 {
+    margin: 4px 0 5px;
+    font-size: clamp(1.75rem, 2.4vw, 2.5rem);
+  }
+
+  .desktop-stack-intro > div > p:last-child {
+    font-size: 0.72rem;
+    line-height: 1.35;
+  }
+
+  .desktop-stack-intro > span {
+    min-width: 82px;
+    padding: 6px 9px;
+  }
+
+  .desktop-stack-intro > span strong {
+    font-size: 1.05rem;
+  }
+
+  .desktop-stack-groups {
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+    gap: 10px;
+    min-height: 160px;
+  }
+
+  .desktop-stack-group,
+  .desktop-stack-group:last-child:nth-child(odd) {
+    grid-column: auto;
+    height: 100%;
+    min-height: 0;
+    padding: 10px;
+  }
+
+  .desktop-stack-group > header {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    gap: 7px;
+    padding-bottom: 7px;
+  }
+
+  .desktop-stack-group > header > span {
+    width: 30px;
+    height: 30px;
+  }
+
+  .desktop-stack-group > header svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .desktop-stack-group h3 {
+    font-size: 0.82rem;
+  }
+
+  .desktop-stack-group header small {
+    font-size: 0.52rem;
+  }
+
+  .desktop-stack-group header b {
+    font-size: 0.68rem;
+  }
+
+  .desktop-stack-group ul {
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  .desktop-stack-group li {
+    min-height: 24px;
+    padding: 4px 7px;
+    font-size: 0.65rem;
+  }
+}
+
+@media (min-width: 621px) and (max-width: 900px) {
+  .desktop-stack-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
