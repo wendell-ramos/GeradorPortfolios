@@ -26,6 +26,57 @@ describe('generated templates', () => {
     act(() => vi.advanceTimersByTime(1100))
     expect(screen.getByRole('heading', { name: /Eu sou Wendell Ramos/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Meus projetos' })).toBeInTheDocument()
+    const shortcuts = screen.getByRole('navigation', { name: 'Aplicativos do portfolio' })
+    expect(shortcuts).toHaveAttribute('data-columns', '1')
+    expect(shortcuts).toHaveAttribute('data-rows', '6')
+  })
+
+  it('groups the Desktop stack by technical area', () => {
+    vi.useFakeTimers()
+    render(
+      <DesktopGeneratedSite
+        {...createPreviewProps({ stack: ['React', 'ASP.NET MVC', 'PostgreSQL', 'Git e GitHub'], template: 'desktop' })}
+        onBackgroundColorChange={() => undefined}
+        onDesktopAreaColorChange={() => undefined}
+      />,
+    )
+
+    act(() => vi.advanceTimersByTime(1100))
+    fireEvent.click(screen.getByRole('button', { name: 'Habilidades' }))
+
+    expect(screen.getByRole('heading', { name: 'Front-end' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Back-end & APIs' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Dados & cloud' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Ferramentas' })).toBeInTheDocument()
+  })
+
+  it('organizes all Desktop shortcuts into multiple columns', () => {
+    vi.useFakeTimers()
+    const base = createPreviewProps()
+    const sections = [
+      ...base.sections,
+      { id: 'education', title: 'Formacao', description: 'Formacao', icon: 'document' as const, enabled: true },
+      { id: 'certifications', title: 'Certificados', description: 'Certificados', icon: 'award' as const, enabled: true },
+      { id: 'services', title: 'Servicos', description: 'Servicos', icon: 'briefcase' as const, enabled: true },
+      { id: 'testimonials', title: 'Depoimentos', description: 'Depoimentos', icon: 'message' as const, enabled: true },
+      { id: 'availability', title: 'Disponibilidade', description: 'Disponibilidade', icon: 'calendar' as const, enabled: true },
+      { id: 'events', title: 'Eventos', description: 'Eventos', icon: 'calendar' as const, enabled: true },
+    ]
+
+    render(
+      <DesktopGeneratedSite
+        {...createPreviewProps({ sections, template: 'desktop' })}
+        onBackgroundColorChange={() => undefined}
+        onDesktopAreaColorChange={() => undefined}
+      />,
+    )
+
+    act(() => vi.advanceTimersByTime(1100))
+    const shortcuts = screen.getByRole('navigation', { name: 'Aplicativos do portfolio' })
+
+    expect(shortcuts).toHaveAttribute('data-columns', '2')
+    expect(shortcuts).toHaveAttribute('data-rows', '6')
+    expect(shortcuts.querySelectorAll('button')).toHaveLength(12)
   })
 
   it('executes a project command in the Terminal', async () => {

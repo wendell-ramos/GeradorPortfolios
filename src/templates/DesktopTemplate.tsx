@@ -1,8 +1,27 @@
 import { type CSSProperties, type MouseEvent as ReactMouseEvent, type ReactNode, useEffect, useState } from 'react'
+import { Braces, Database, Settings2, Wrench } from 'lucide-react'
 import type { DesktopColorTarget, DesktopEditableTarget, PortfolioPreviewProps, SectionIcon } from '../models/portfolio'
 import { defaultDesktopAreaColors, defaultTemplateBackgrounds, desktopAreaColorOptions, desktopColorTargets } from '../data/devPortfolioDefaults'
 import { formatExperiencePeriod, getContrastColor, sectionColorStyle } from '../utils/portfolio'
 import { ContactIcon, DesktopEmptyState, DesktopShortcutIcon } from '../components/PortfolioIcons'
+
+type DesktopStackGroupId = 'frontend' | 'backend' | 'data' | 'tools'
+
+const desktopStackGroupDefinitions = [
+  { id: 'frontend', label: 'Front-end', description: 'Interfaces e experiencias', icon: Braces },
+  { id: 'backend', label: 'Back-end & APIs', description: 'Regras e integracoes', icon: Wrench },
+  { id: 'data', label: 'Dados & cloud', description: 'Persistencia e infraestrutura', icon: Database },
+  { id: 'tools', label: 'Ferramentas', description: 'Fluxo e produtividade', icon: Settings2 },
+] as const
+
+function getDesktopStackGroup(item: string): DesktopStackGroupId {
+  const normalized = item.toLocaleLowerCase('pt-BR')
+
+  if (/html|css|javascript|typescript|react|vite|canvas|front|tailwind|sass|next|interface|ui|ux/.test(normalized)) return 'frontend'
+  if (/sql|postgres|mysql|indexeddb|cloudflare d1|banco|database|supabase|firebase|azure|aws|cloud/.test(normalized)) return 'data'
+  if (/git|github|wrangler|dns|dominio|domínio|excel|vba|figma|visual studio|postman|docker/.test(normalized)) return 'tools'
+  return 'backend'
+}
 
 export function DesktopGeneratedSite({
   accentColor,
@@ -71,6 +90,12 @@ export function DesktopGeneratedSite({
   const visibleServices = services.filter((service) => service.title.trim() || service.description.trim())
   const visibleLanguages = languagesEnabled ? languages.filter((language) => language.name.trim()) : []
   const visibleTestimonials = testimonials.filter((testimonial) => testimonial.name.trim() || testimonial.quote.trim())
+  const stackGroups = desktopStackGroupDefinitions
+    .map((definition) => ({
+      ...definition,
+      items: stack.filter((item) => getDesktopStackGroup(item) === definition.id),
+    }))
+    .filter((group) => group.items.length > 0)
   const terminalUser = name.trim().toLowerCase().replaceAll(' ', '-') || 'dev'
   const initials = name
     .split(' ')
@@ -206,14 +231,32 @@ export function DesktopGeneratedSite({
 
     if (activeSection === 'stack') {
       return (
-        <div className="desktop-copy-content">
-          <p className="desktop-window-kicker">Ferramentas e tecnologias</p>
-          <h2>Habilidades</h2>
+        <div className="desktop-copy-content desktop-stack-content">
+          <div className="desktop-stack-intro">
+            <div>
+              <p className="desktop-window-kicker">Competencias instaladas</p>
+              <h2>Minha caixa de ferramentas</h2>
+              <p>Tecnologias organizadas por area para facilitar a leitura do perfil tecnico.</p>
+            </div>
+            {stack.length > 0 && <span><strong>{String(stack.length).padStart(2, '0')}</strong> tecnologias</span>}
+          </div>
           {stack.length === 0 && <DesktopEmptyState message="Nenhuma tecnologia adicionada." />}
-          <div className="desktop-stack-list">
-            {stack.map((item, index) => (
-              <span key={item}><small>{String(index + 1).padStart(2, '0')}</small>{item}</span>
-            ))}
+          <div className="desktop-stack-groups">
+            {stackGroups.map((group) => {
+              const GroupIcon = group.icon
+              return (
+                <article className={`desktop-stack-group is-${group.id}`} key={group.id}>
+                  <header>
+                    <span aria-hidden="true"><GroupIcon /></span>
+                    <div><h3>{group.label}</h3><small>{group.description}</small></div>
+                    <b>{String(group.items.length).padStart(2, '0')}</b>
+                  </header>
+                  <ul>
+                    {group.items.map((item) => <li key={item}><i aria-hidden="true" />{item}</li>)}
+                  </ul>
+                </article>
+              )
+            })}
           </div>
         </div>
       )
@@ -338,6 +381,15 @@ export function DesktopGeneratedSite({
     { id: 'home', title: 'Bem-vindo', icon: 'home' as SectionIcon },
     ...desktopSectionItems,
   ]
+  const desktopShortcutRows = Math.min(6, desktopItems.length)
+  const desktopShortcutColumns = Math.ceil(desktopItems.length / desktopShortcutRows)
+  const desktopShortcutColumnWidth = templateSettings.desktop.shortcutSize === 'small' ? 76 : templateSettings.desktop.shortcutSize === 'large' ? 104 : 92
+  const desktopShortcutOffset = 24 + (desktopShortcutColumns * desktopShortcutColumnWidth) + (Math.max(0, desktopShortcutColumns - 1) * 8) + 18
+  const desktopLayoutStyle = {
+    '--desktop-shortcut-rows': desktopShortcutRows,
+    '--desktop-shortcut-columns': desktopShortcutColumns,
+    '--desktop-shortcut-offset': `${desktopShortcutOffset}px`,
+  } as CSSProperties
   const windowTitle = activeSection === 'home'
     ? templateSettings.desktop.homeTitle || 'Portfolio'
     : activeSection === 'resume'
@@ -365,7 +417,7 @@ export function DesktopGeneratedSite({
       onClick={(event) => {
         if (event.target === event.currentTarget) selectColorArea(event, 'background')
       }}
-      style={style}
+      style={{ ...style, ...desktopLayoutStyle }}
     >
       <button
         aria-pressed={editingColors}
@@ -421,7 +473,12 @@ export function DesktopGeneratedSite({
         <span>{name}<br />PORTFOLIO</span>
       </div>
 
-      <nav className="desktop-site-icons" aria-label="Aplicativos do portfolio">
+      <nav
+        aria-label="Aplicativos do portfolio"
+        className="desktop-site-icons"
+        data-columns={desktopShortcutColumns}
+        data-rows={desktopShortcutRows}
+      >
         {desktopItems.map((item) => (
           <button className={activeSection === item.id && windowOpen ? 'is-active' : ''} key={item.id} onClick={() => openSection(item.id)} type="button">
             <DesktopShortcutIcon icon={item.icon} />

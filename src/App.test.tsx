@@ -48,10 +48,11 @@ describe('portfolio builder flow', () => {
     await user.click(screen.getByRole('button', { name: 'Continuar' }))
     await user.click(screen.getByRole('button', { name: 'Continuar' }))
 
-    expect(screen.getByDisplayValue('Desenvolvimento de sistemas web')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Disponivel para oportunidades')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Cliente de exemplo')).toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: 'Remover' })[0]).toBeDisabled()
+    expect(screen.getByText('Formacao academica, instituicoes e periodo de estudo.')).toBeInTheDocument()
+    expect(screen.getByText('Cursos, certificacoes e credenciais profissionais.')).toBeInTheDocument()
+    expect(screen.getByText('Solucoes e tipos de entrega oferecidos para clientes e equipes.')).toBeInTheDocument()
+    expect(screen.getByText('Comentarios de clientes, colegas e parceiros profissionais.')).toBeInTheDocument()
+    expect(screen.getByText('Situacao atual, modelo de trabalho e oportunidades procuradas.')).toBeInTheDocument()
   })
 
   it('restores the saved step and template from IndexedDB', async () => {

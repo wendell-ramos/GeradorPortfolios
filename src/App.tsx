@@ -268,6 +268,7 @@ function App() {
 
   const restoreDraft = useCallback((draft: PortfolioDraft) => {
     const savedTemplateSettings = draft.templateSettings ?? defaultTemplateSettings
+    const optionalExampleSectionIds = new Set(['education', 'certifications', 'services', 'testimonials', 'availability'])
 
     setExampleDataLocked(draft.exampleDataLocked)
     setStep(draft.step)
@@ -293,15 +294,15 @@ function App() {
     setResumeName(draft.resumeName ?? '')
     setResumeFileError('')
     setExperiences(draft.experiences)
-    setEducations(draft.educations)
-    setCertifications(draft.certifications)
+    setEducations(draft.exampleDataLocked ? [] : draft.educations)
+    setCertifications(draft.exampleDataLocked ? [] : draft.certifications)
     setLanguagesEnabled(draft.languagesEnabled)
-    setServices(draft.services)
+    setServices(draft.exampleDataLocked ? [] : draft.services)
     setLanguages(draft.languages)
-    setTestimonials(draft.testimonials)
-    setAvailability(draft.availability)
+    setTestimonials(draft.exampleDataLocked ? [] : draft.testimonials)
+    setAvailability(draft.exampleDataLocked ? { status: '', workModels: '', opportunityTypes: '', note: '' } : draft.availability)
     setStackText(draft.stackText)
-    setSections(draft.sections)
+    setSections(draft.exampleDataLocked ? draft.sections.filter((section) => !optionalExampleSectionIds.has(section.id)) : draft.sections)
     setProjects((draft.projects ?? []).map((project, index) => ({
       ...project,
       category: project.category ?? 'Projeto',

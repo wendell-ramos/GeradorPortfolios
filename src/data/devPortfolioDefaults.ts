@@ -95,72 +95,16 @@ export function createDefaultSections(): PortfolioSection[] {
   ]
 }
 
-function createPresetSections(): PortfolioSection[] {
-  return [
-    { id: 'about', ...defaultSections.about, enabled: true, locked: true },
-    { id: 'stack', ...defaultSections.stack, enabled: true, locked: true },
-    { id: 'education', ...defaultSections.education, enabled: true },
-    { id: 'certifications', ...defaultSections.certifications, enabled: true },
-    { id: 'services', ...defaultSections.services, enabled: true },
-    { id: 'projects', ...defaultSections.projects, enabled: true, locked: true },
-    { id: 'testimonials', ...defaultSections.testimonials, enabled: true },
-    { id: 'availability', ...defaultSections.availability, enabled: true },
-    { id: 'contact', ...defaultSections.contact, enabled: true, locked: true },
-  ]
-}
-
 export function createPresetDevPortfolio() {
-  const educations: DevEducation[] = [{
-    id: crypto.randomUUID(),
-    institution: 'Universidade do Oeste Paulista',
-    course: 'Sistemas de Informacao',
-    degree: 'Bacharelado',
-    location: 'Presidente Prudente - SP',
-    startYear: '2024',
-    endYear: '',
-    current: true,
-  }]
-  const certifications: DevCertification[] = [{
-    id: crypto.randomUUID(),
-    name: 'Desenvolvimento Web Full Stack',
-    issuer: 'Plataforma de cursos online',
-    issueDate: '2025',
-    credentialId: 'EXEMPLO-FULLSTACK-2025',
-    credentialUrl: 'https://example.com/credenciais/full-stack-2025',
-  }]
-  const services: DevService[] = [
-    {
-      id: crypto.randomUUID(),
-      title: 'Desenvolvimento de sistemas web',
-      description: 'Planejamento e construcao de sistemas responsivos para organizar processos, dados e rotinas de negocio.',
-      technologies: 'React, TypeScript, ASP.NET, PostgreSQL',
-      deliveryType: 'Projeto completo',
-    },
-    {
-      id: crypto.randomUUID(),
-      title: 'Automacoes e dashboards',
-      description: 'Solucoes para reduzir tarefas repetitivas e transformar dados em indicadores claros para tomada de decisao.',
-      technologies: 'JavaScript, C#, SQL, APIs',
-      deliveryType: 'Solucao sob medida',
-    },
-  ]
+  const educations: DevEducation[] = []
+  const certifications: DevCertification[] = []
+  const services: DevService[] = []
   const languages: DevLanguage[] = [
     { id: crypto.randomUUID(), name: 'Portugues', level: 'Nativo' },
     { id: crypto.randomUUID(), name: 'Ingles', level: 'Intermediario' },
   ]
-  const testimonials: DevTestimonial[] = [{
-    id: crypto.randomUUID(),
-    name: 'Cliente de exemplo',
-    role: 'Responsavel pelo projeto',
-    company: 'Projeto demonstrativo',
-    quote: 'Transformou uma necessidade do dia a dia em uma solucao simples, organizada e facil de usar.',
-  }]
-  const availability: DevAvailability = {
-    status: 'Disponivel para oportunidades',
-    workModels: 'Flexivel',
-    opportunityTypes: 'Estagio, projetos web e desenvolvimento de sistemas',
-    note: 'Disponivel para conversar sobre oportunidades remotas, hibridas ou presenciais em Presidente Prudente e regiao.',
-  }
+  const testimonials: DevTestimonial[] = []
+  const availability: DevAvailability = { status: '', workModels: '', opportunityTypes: '', note: '' }
   const experiences: DevExperience[] = [{
     id: crypto.randomUUID(),
     company: 'Projetos independentes',
@@ -211,7 +155,7 @@ export function createPresetDevPortfolio() {
     testimonials,
     availability,
     stackText: 'React\nTypeScript\nASP.NET MVC\nC#\nPostgreSQL\nCloudflare',
-    sections: createPresetSections(),
+    sections: createDefaultSections(),
     projects,
     contacts,
   }
