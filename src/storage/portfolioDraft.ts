@@ -8,11 +8,15 @@ import {
 import type {
   ContactLink,
   ContactType,
+  DevAvailability,
   DevCertification,
   DevEducation,
   DevExperience,
+  DevLanguage,
   DevProject,
+  DevService,
   DevTemplate,
+  DevTestimonial,
   PortfolioDraft,
   PortfolioSection,
   SectionIcon,
@@ -48,6 +52,18 @@ function stringValue(value: unknown, fallback = '') {
 
 function booleanValue(value: unknown, fallback = false) {
   return typeof value === 'boolean' ? value : fallback
+}
+
+function isExamplePresetDraft(value: Record<string, unknown>) {
+  const hasExampleProject = Array.isArray(value.projects)
+    && value.projects.some((project) => isRecord(project) && project.title === 'FinControl')
+  const hasExampleContact = Array.isArray(value.contacts)
+    && value.contacts.some((contact) => isRecord(contact) && contact.value === 'wendellnascimentoramos@gmail.com')
+
+  return value.name === 'Wendell Ramos'
+    && value.role === 'Desenvolvedor de Sistemas'
+    && hasExampleProject
+    && hasExampleContact
 }
 
 function createId(prefix: string) {
@@ -94,6 +110,26 @@ function normalizeCertification(value: unknown): DevCertification | null {
     credentialId: stringValue(value.credentialId),
     credentialUrl: stringValue(value.credentialUrl),
   }
+}
+
+function normalizeService(value: unknown): DevService | null {
+  if (!isRecord(value)) return null
+  return { id: stringValue(value.id, createId('service')), title: stringValue(value.title), description: stringValue(value.description), technologies: stringValue(value.technologies), deliveryType: stringValue(value.deliveryType) }
+}
+
+function normalizeLanguage(value: unknown): DevLanguage | null {
+  if (!isRecord(value)) return null
+  return { id: stringValue(value.id, createId('language')), name: stringValue(value.name), level: stringValue(value.level) }
+}
+
+function normalizeTestimonial(value: unknown): DevTestimonial | null {
+  if (!isRecord(value)) return null
+  return { id: stringValue(value.id, createId('testimonial')), name: stringValue(value.name), role: stringValue(value.role), company: stringValue(value.company), quote: stringValue(value.quote) }
+}
+
+function normalizeAvailability(value: unknown): DevAvailability {
+  if (!isRecord(value)) return { status: '', workModels: '', opportunityTypes: '', note: '' }
+  return { status: stringValue(value.status), workModels: stringValue(value.workModels), opportunityTypes: stringValue(value.opportunityTypes), note: stringValue(value.note) }
 }
 
 function normalizeProject(value: unknown, index: number): DevProject | null {
@@ -161,6 +197,7 @@ export function normalizePortfolioDraft(value: unknown): PortfolioDraft | null {
   return {
     version: 1,
     updatedAt: stringValue(value.updatedAt, new Date().toISOString()),
+    exampleDataLocked: booleanValue(value.exampleDataLocked) || isExamplePresetDraft(value),
     step: savedStep,
     maxUnlockedStep: Math.min(Math.max(typeof value.maxUnlockedStep === 'number' ? value.maxUnlockedStep : 0, 0), steps.length - 1),
     template,
@@ -202,6 +239,17 @@ export function normalizePortfolioDraft(value: unknown): PortfolioDraft | null {
     certifications: Array.isArray(value.certifications)
       ? value.certifications.map(normalizeCertification).filter((item): item is DevCertification => Boolean(item))
       : [],
+    languagesEnabled: booleanValue(value.languagesEnabled),
+    services: Array.isArray(value.services)
+      ? value.services.map(normalizeService).filter((item): item is DevService => Boolean(item))
+      : [],
+    languages: Array.isArray(value.languages)
+      ? value.languages.map(normalizeLanguage).filter((item): item is DevLanguage => Boolean(item))
+      : [],
+    testimonials: Array.isArray(value.testimonials)
+      ? value.testimonials.map(normalizeTestimonial).filter((item): item is DevTestimonial => Boolean(item))
+      : [],
+    availability: normalizeAvailability(value.availability),
     stackText: stringValue(value.stackText),
     sections,
     projects: Array.isArray(value.projects)

@@ -39,8 +39,19 @@ describe('portfolio builder flow', () => {
     await user.click(await screen.findByRole('button', { name: /Usar dados de exemplo/ }))
 
     expect(screen.getByRole('textbox', { name: 'Nome' })).toHaveValue('Wendell Ramos')
+    expect(screen.getByRole('textbox', { name: 'Nome' })).toBeDisabled()
     expect(screen.getByRole('textbox', { name: 'Cargo / assinatura' })).toHaveValue('Desenvolvedor de Sistemas')
     expect(screen.getByText('Curriculo - Wendell Ramos.pdf')).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: /Exibir idiomas no Sobre mim/ })).toBeChecked()
+    expect(screen.getAllByRole('textbox', { name: 'Idioma' }).map((input) => (input as HTMLInputElement).value)).toEqual(['Portugues', 'Ingles'])
+
+    await user.click(screen.getByRole('button', { name: 'Continuar' }))
+    await user.click(screen.getByRole('button', { name: 'Continuar' }))
+
+    expect(screen.getByDisplayValue('Desenvolvimento de sistemas web')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Disponivel para oportunidades')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Cliente de exemplo')).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Remover' })[0]).toBeDisabled()
   })
 
   it('restores the saved step and template from IndexedDB', async () => {

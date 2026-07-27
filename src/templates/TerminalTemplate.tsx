@@ -10,6 +10,11 @@ export function TerminalGeneratedSite({
   certifications,
   educations,
   experiences,
+  services,
+  languages,
+  languagesEnabled,
+  testimonials,
+  availability,
   headline,
   location,
   name,
@@ -24,12 +29,15 @@ export function TerminalGeneratedSite({
 }: PortfolioPreviewProps) {
   const enabledSections = sections.filter((section) => section.enabled)
   const hasSection = (id: DefaultSection) => enabledSections.some((section) => section.id === id)
-  const customSections = enabledSections.filter((section) => !['about', 'stack', 'education', 'certifications', 'projects', 'contact'].includes(section.id))
+  const customSections = enabledSections.filter((section) => !['about', 'stack', 'education', 'certifications', 'services', 'testimonials', 'availability', 'projects', 'contact'].includes(section.id))
   const visibleProjects = projects.filter((project) => project.title.trim())
   const visibleContacts = contacts.filter((contact) => contact.value.trim() && contact.url.trim())
   const visibleExperiences = experiences.filter((experience) => experience.company.trim() || experience.role.trim())
   const visibleEducations = educations.filter((education) => education.institution.trim() || education.course.trim())
   const visibleCertifications = certifications.filter((certification) => certification.name.trim() || certification.issuer.trim())
+  const visibleServices = services.filter((service) => service.title.trim() || service.description.trim())
+  const visibleLanguages = languagesEnabled ? languages.filter((language) => language.name.trim()) : []
+  const visibleTestimonials = testimonials.filter((testimonial) => testimonial.name.trim() || testimonial.quote.trim())
   const userName = terminalSlug(name).replace(/-/g, '_') || 'dev'
   const terminalHost = templateSettings.terminal.host || 'portfolio'
   const prompt = `${userName}@${terminalHost}:~/portfolio$`
@@ -41,6 +49,9 @@ export function TerminalGeneratedSite({
     ...(hasSection('stack') ? [{ id: 'stack', label: sectionCommand('stack', 'stack'), aliases: [sectionCommand('stack', 'stack'), 'stack', 'skills', 'habilidades', 'tecnologias'] }] : []),
     ...(hasSection('education') ? [{ id: 'education', label: sectionCommand('education', 'education'), aliases: [sectionCommand('education', 'education'), 'education', 'formacao', 'academic'] }] : []),
     ...(hasSection('certifications') ? [{ id: 'certifications', label: sectionCommand('certifications', 'certifications'), aliases: [sectionCommand('certifications', 'certifications'), 'certifications', 'certificados', 'courses', 'cursos'] }] : []),
+    ...(hasSection('services') ? [{ id: 'services', label: sectionCommand('services', 'services'), aliases: [sectionCommand('services', 'services'), 'services', 'servicos'] }] : []),
+    ...(hasSection('testimonials') ? [{ id: 'testimonials', label: sectionCommand('testimonials', 'testimonials'), aliases: [sectionCommand('testimonials', 'testimonials'), 'testimonials', 'depoimentos'] }] : []),
+    ...(hasSection('availability') ? [{ id: 'availability', label: sectionCommand('availability', 'availability'), aliases: [sectionCommand('availability', 'availability'), 'availability', 'disponibilidade', 'status'] }] : []),
     ...(hasSection('projects') ? [{ id: 'projects', label: sectionCommand('projects', 'projects'), aliases: [sectionCommand('projects', 'projects'), 'projects', 'projetos', 'ls-projects'] }] : []),
     ...(visibleExperiences.length ? [{ id: 'experience', label: 'experience', aliases: ['experience', 'experiences', 'experiencia', 'experiencias', 'work'] }] : []),
     ...(resumeEnabled && resumeFile ? [{ id: 'resume', label: 'resume', aliases: ['resume', 'cv', 'curriculo'] }] : []),
@@ -107,7 +118,7 @@ export function TerminalGeneratedSite({
             {commands.filter((command) => command.id !== 'help').map((command) => (
               <div key={command.id}>
                 <dt>{command.label}</dt>
-                <dd>{command.id === 'whoami' ? 'identidade e resumo profissional' : command.id === 'stack' ? 'tecnologias e ferramentas' : command.id === 'education' ? 'formacao academica' : command.id === 'certifications' ? 'cursos e credenciais' : command.id === 'projects' ? 'projetos publicados e repositorios' : command.id === 'experience' ? 'historico profissional' : command.id === 'resume' ? 'abre o curriculo em PDF' : command.id === 'contact' ? 'canais para contato' : 'arquivo de secao personalizada'}</dd>
+                <dd>{command.id === 'whoami' ? 'identidade, resumo e idiomas' : command.id === 'stack' ? 'tecnologias e ferramentas' : command.id === 'education' ? 'formacao academica' : command.id === 'certifications' ? 'cursos e credenciais' : command.id === 'services' ? 'servicos e entregas' : command.id === 'testimonials' ? 'feedbacks profissionais' : command.id === 'availability' ? 'disponibilidade profissional' : command.id === 'projects' ? 'projetos publicados e repositorios' : command.id === 'experience' ? 'historico profissional' : command.id === 'resume' ? 'abre o curriculo em PDF' : command.id === 'contact' ? 'canais para contato' : 'arquivo de secao personalizada'}</dd>
               </div>
             ))}
             <div><dt>clear</dt><dd>limpa a tela do terminal</dd></div>
@@ -129,6 +140,15 @@ export function TerminalGeneratedSite({
             <p>{bio || 'Resumo profissional ainda nao informado.'}</p>
             <p className="terminal-file-label">--- EOF ---</p>
           </div>
+          {visibleLanguages.length > 0 && (
+            <div className="terminal-language-output">
+              <p className="terminal-file-label">--- languages.env ---</p>
+              {visibleLanguages.map((language, index) => (
+                <p key={language.id}><span>LANGUAGE_{String(index + 1).padStart(2, '0')}</span>=&quot;{language.name}&quot; <em># {language.level || 'nivel nao informado'}</em></p>
+              ))}
+              <p className="terminal-file-label">--- EOF ---</p>
+            </div>
+          )}
         </div>
       )
     }
@@ -171,6 +191,18 @@ export function TerminalGeneratedSite({
 
     if (activeCommand === 'certifications') {
       return <div className="terminal-record-output"><p>Credenciais encontradas ({visibleCertifications.length}):</p>{visibleCertifications.length ? visibleCertifications.map((certification, index) => <article key={certification.id}><p><span>[{String(index + 1).padStart(2, '0')}]</span> {certification.name || 'Certificacao'}</p><p>{certification.issuer || 'Instituicao nao informada'}{certification.issueDate ? ` | ${certification.issueDate}` : ''}</p>{certification.credentialId && <p>id: {certification.credentialId}</p>}{certification.credentialUrl && <a href={certification.credentialUrl} rel="noreferrer" target="_blank">[validar credencial]</a>}</article>) : <p className="terminal-muted">Nenhuma certificacao cadastrada.</p>}</div>
+    }
+
+    if (activeCommand === 'services') {
+      return <div className="terminal-record-output"><p>Servicos disponiveis ({visibleServices.length}):</p>{visibleServices.length ? visibleServices.map((service, index) => <article key={service.id}><p><span>[{String(index + 1).padStart(2, '0')}]</span> {service.title || 'Servico'}</p>{service.description && <p>{service.description}</p>}{service.deliveryType && <p>entrega: {service.deliveryType}</p>}{service.technologies && <p>stack: {service.technologies}</p>}</article>) : <p className="terminal-muted">Nenhum servico cadastrado.</p>}</div>
+    }
+
+    if (activeCommand === 'testimonials') {
+      return <div className="terminal-record-output"><p>Feedbacks profissionais ({visibleTestimonials.length}):</p>{visibleTestimonials.length ? visibleTestimonials.map((testimonial, index) => <article key={testimonial.id}><p><span>[{String(index + 1).padStart(2, '0')}]</span> “{testimonial.quote || 'Depoimento nao informado.'}”</p><p>-- {testimonial.name || 'Autor'}{testimonial.role ? `, ${testimonial.role}` : ''}{testimonial.company ? ` @ ${testimonial.company}` : ''}</p></article>) : <p className="terminal-muted">Nenhum depoimento cadastrado.</p>}</div>
+    }
+
+    if (activeCommand === 'availability') {
+      return <div className="terminal-about-output"><p><span>status</span> = "{availability.status || 'nao informado'}"</p><p><span>work_model</span> = "{availability.workModels || 'nao informado'}"</p><p><span>opportunities</span> = "{availability.opportunityTypes || 'nao informado'}"</p>{availability.note && <div className="terminal-text-file"><p>{availability.note}</p></div>}</div>
     }
 
     if (activeCommand === 'experience') {

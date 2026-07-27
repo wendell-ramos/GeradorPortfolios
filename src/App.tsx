@@ -7,11 +7,15 @@ import type {
   ContactLink,
   ContactType,
   DesktopColorTarget,
+  DevAvailability,
   DevCertification,
   DevEducation,
   DevExperience,
+  DevLanguage,
   DevProject,
+  DevService,
   DevTemplate,
+  DevTestimonial,
   PortfolioDraft,
   PortfolioSection,
   SectionIcon,
@@ -42,6 +46,7 @@ function App() {
   const [initialPreset] = useState(createPresetDevPortfolio)
   const [builderFlowMode] = useState<'free' | 'guided'>('guided')
   const [setupComplete, setSetupComplete] = useState(false)
+  const [exampleDataLocked, setExampleDataLocked] = useState(initialPreset.exampleDataLocked)
   const [step, setStep] = useState<BuilderStep>('identity')
   const [maxUnlockedStep, setMaxUnlockedStep] = useState(0)
   const [showStepError, setShowStepError] = useState(false)
@@ -66,6 +71,11 @@ function App() {
   const [experiences, setExperiences] = useState<DevExperience[]>(initialPreset.experiences)
   const [educations, setEducations] = useState<DevEducation[]>(initialPreset.educations)
   const [certifications, setCertifications] = useState<DevCertification[]>(initialPreset.certifications)
+  const [languagesEnabled, setLanguagesEnabled] = useState(initialPreset.languagesEnabled)
+  const [services, setServices] = useState<DevService[]>(initialPreset.services)
+  const [languages, setLanguages] = useState<DevLanguage[]>(initialPreset.languages)
+  const [testimonials, setTestimonials] = useState<DevTestimonial[]>(initialPreset.testimonials)
+  const [availability, setAvailability] = useState<DevAvailability>(initialPreset.availability)
 
   function handleProfilePhoto(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -196,6 +206,58 @@ function App() {
   function moveCertification(certificationId: string, direction: -1 | 1) {
     setCertifications((current) => moveById(current, certificationId, direction))
   }
+
+  function addService() {
+    setServices((current) => [...current, { id: crypto.randomUUID(), title: '', description: '', technologies: '', deliveryType: '' }])
+  }
+
+  function updateService<K extends keyof Omit<DevService, 'id'>>(serviceId: string, field: K, value: DevService[K]) {
+    setServices((current) => current.map((item) => item.id === serviceId ? { ...item, [field]: value } : item))
+  }
+
+  function removeService(serviceId: string) {
+    setServices((current) => current.filter((item) => item.id !== serviceId))
+  }
+
+  function moveService(serviceId: string, direction: -1 | 1) {
+    setServices((current) => moveById(current, serviceId, direction))
+  }
+
+  function addLanguage() {
+    setLanguages((current) => [...current, { id: crypto.randomUUID(), name: '', level: '' }])
+  }
+
+  function updateLanguage<K extends keyof Omit<DevLanguage, 'id'>>(languageId: string, field: K, value: DevLanguage[K]) {
+    setLanguages((current) => current.map((item) => item.id === languageId ? { ...item, [field]: value } : item))
+  }
+
+  function removeLanguage(languageId: string) {
+    setLanguages((current) => current.filter((item) => item.id !== languageId))
+  }
+
+  function moveLanguage(languageId: string, direction: -1 | 1) {
+    setLanguages((current) => moveById(current, languageId, direction))
+  }
+
+  function addTestimonial() {
+    setTestimonials((current) => [...current, { id: crypto.randomUUID(), name: '', role: '', company: '', quote: '' }])
+  }
+
+  function updateTestimonial<K extends keyof Omit<DevTestimonial, 'id'>>(testimonialId: string, field: K, value: DevTestimonial[K]) {
+    setTestimonials((current) => current.map((item) => item.id === testimonialId ? { ...item, [field]: value } : item))
+  }
+
+  function removeTestimonial(testimonialId: string) {
+    setTestimonials((current) => current.filter((item) => item.id !== testimonialId))
+  }
+
+  function moveTestimonial(testimonialId: string, direction: -1 | 1) {
+    setTestimonials((current) => moveById(current, testimonialId, direction))
+  }
+
+  function updateAvailability<K extends keyof DevAvailability>(field: K, value: DevAvailability[K]) {
+    setAvailability((current) => ({ ...current, [field]: value }))
+  }
   const [stackText, setStackText] = useState(initialPreset.stackText)
   const [sections, setSections] = useState<PortfolioSection[]>(initialPreset.sections)
   const [customSectionTitle, setCustomSectionTitle] = useState('')
@@ -207,6 +269,7 @@ function App() {
   const restoreDraft = useCallback((draft: PortfolioDraft) => {
     const savedTemplateSettings = draft.templateSettings ?? defaultTemplateSettings
 
+    setExampleDataLocked(draft.exampleDataLocked)
     setStep(draft.step)
     setMaxUnlockedStep(draft.maxUnlockedStep)
     setTemplate(draft.template)
@@ -232,6 +295,11 @@ function App() {
     setExperiences(draft.experiences)
     setEducations(draft.educations)
     setCertifications(draft.certifications)
+    setLanguagesEnabled(draft.languagesEnabled)
+    setServices(draft.services)
+    setLanguages(draft.languages)
+    setTestimonials(draft.testimonials)
+    setAvailability(draft.availability)
     setStackText(draft.stackText)
     setSections(draft.sections)
     setProjects((draft.projects ?? []).map((project, index) => ({
@@ -249,6 +317,7 @@ function App() {
     {
       version: 1,
       updatedAt: new Date().toISOString(),
+      exampleDataLocked,
       step,
       maxUnlockedStep,
       template,
@@ -268,12 +337,17 @@ function App() {
       experiences,
       educations,
       certifications,
+      languagesEnabled,
+      services,
+      languages,
+      testimonials,
+      availability,
       stackText,
       sections,
       projects,
       contacts,
     }
-  ), [accentColor, bio, certifications, contacts, desktopAreaColors, educations, experiences, headline, location, maxUnlockedStep, name, profilePhoto, projects, resumeEnabled, resumeFile, resumeName, role, sections, stackText, step, template, templateBackgrounds, templateSettings])
+  ), [accentColor, availability, bio, certifications, contacts, desktopAreaColors, educations, exampleDataLocked, experiences, headline, languages, languagesEnabled, location, maxUnlockedStep, name, profilePhoto, projects, resumeEnabled, resumeFile, resumeName, role, sections, services, stackText, step, template, templateBackgrounds, templateSettings, testimonials])
 
   const { draftErrorReason, draftReady, draftStatus, saveNow } = usePortfolioDraftPersistence({
     currentDraft,
@@ -555,6 +629,7 @@ function App() {
   }
 
   function startEmptyPortfolio() {
+    setExampleDataLocked(false)
     setStep('identity')
     setMaxUnlockedStep(0)
     setShowStepError(false)
@@ -579,6 +654,11 @@ function App() {
     setExperiences([])
     setEducations([])
     setCertifications([])
+    setLanguagesEnabled(false)
+    setServices([])
+    setLanguages([])
+    setTestimonials([])
+    setAvailability({ status: '', workModels: '', opportunityTypes: '', note: '' })
     setStackText('')
     setSections(createDefaultSections())
     setCustomSectionTitle('')
@@ -591,6 +671,7 @@ function App() {
 
   function startPresetPortfolio() {
     const preset = createPresetDevPortfolio()
+    setExampleDataLocked(true)
     setStep('identity')
     setMaxUnlockedStep(0)
     setShowStepError(false)
@@ -615,6 +696,11 @@ function App() {
     setExperiences(preset.experiences)
     setEducations(preset.educations)
     setCertifications(preset.certifications)
+    setLanguagesEnabled(preset.languagesEnabled)
+    setServices(preset.services)
+    setLanguages(preset.languages)
+    setTestimonials(preset.testimonials)
+    setAvailability(preset.availability)
     setStackText(preset.stackText)
     setSections(preset.sections)
     setCustomSectionTitle('')
@@ -651,6 +737,11 @@ function App() {
         bio={bio}
         contacts={contacts}
         certifications={certifications}
+        languagesEnabled={languagesEnabled}
+        services={services}
+        languages={languages}
+        testimonials={testimonials}
+        availability={availability}
         educations={educations}
         experiences={experiences}
         headline={headline}
@@ -724,9 +815,17 @@ function App() {
         </nav>
       )}
 
-      <section className="flow-card">
+      <section className={`flow-card${exampleDataLocked && step !== 'preview' ? ' has-example-lock' : ''}`}>
+        {exampleDataLocked && step !== 'preview' && (
+          <div className="example-data-lock-notice" role="status">
+            <Check aria-hidden="true" />
+            <span><strong>Dados de exemplo fixos</strong><small>Este conteudo demonstrativo nao pode ser editado, removido ou reordenado.</small></span>
+          </div>
+        )}
+        <fieldset className="example-data-lock-surface" disabled={exampleDataLocked && step !== 'preview'}>
         {step === 'identity' && (
           <IdentityStep
+            addLanguage={addLanguage}
             addExperience={addExperience}
             bio={bio}
             experiences={experiences}
@@ -735,11 +834,15 @@ function App() {
             handleResumeFile={handleResumeFile}
             headline={headline}
             location={location}
+            languages={languages}
+            languagesEnabled={languagesEnabled}
+            moveLanguage={moveLanguage}
             moveExperience={moveExperience}
             name={name}
             profilePhoto={profilePhoto}
             profilePhotoError={profilePhotoError}
             removeResumeFile={removeResumeFile}
+            removeLanguage={removeLanguage}
             resumeEnabled={resumeEnabled}
             resumeFile={resumeFile}
             resumeFileError={resumeFileError}
@@ -753,8 +856,10 @@ function App() {
             setProfilePhoto={setProfilePhoto}
             setProfilePhotoError={setProfilePhotoError}
             setResumeEnabled={setResumeEnabled}
+            setLanguagesEnabled={setLanguagesEnabled}
             setRole={setRole}
             updateExperience={updateExperience}
+            updateLanguage={updateLanguage}
           />
         )}
 
@@ -777,6 +882,9 @@ function App() {
             addPresetSection={addPresetSection}
             addCertification={addCertification}
             addEducation={addEducation}
+            addService={addService}
+            addTestimonial={addTestimonial}
+            availability={availability}
             certifications={certifications}
             customSectionDescription={customSectionDescription}
             customSectionIcon={customSectionIcon}
@@ -785,10 +893,15 @@ function App() {
             educations={educations}
             moveCertification={moveCertification}
             moveEducation={moveEducation}
+            moveService={moveService}
+            moveTestimonial={moveTestimonial}
             moveSection={moveSection}
             removeSection={removeSection}
             removeCertification={removeCertification}
             removeEducation={removeEducation}
+            removeService={removeService}
+            removeTestimonial={removeTestimonial}
+            services={services}
             sections={sections}
             setCustomSectionDescription={setCustomSectionDescription}
             setCustomSectionIcon={setCustomSectionIcon}
@@ -804,6 +917,10 @@ function App() {
             updateSectionTerminalCommand={updateSectionTerminalCommand}
             updateCertification={updateCertification}
             updateEducation={updateEducation}
+            testimonials={testimonials}
+            updateAvailability={updateAvailability}
+            updateService={updateService}
+            updateTestimonial={updateTestimonial}
           />
         )}
 
@@ -845,6 +962,7 @@ function App() {
             template={template}
           />
         )}
+        </fieldset>
         {builderFlowMode === 'guided' && showStepError && !stepCompletion[step] && (
           <p className="step-validation-message" role="alert">{stepErrorMessages[step]}</p>
         )}

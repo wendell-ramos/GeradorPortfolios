@@ -13,6 +13,11 @@ export function DesktopGeneratedSite({
   certifications,
   educations,
   experiences,
+  services,
+  languages,
+  languagesEnabled,
+  testimonials,
+  availability,
   headline,
   location,
   name,
@@ -63,6 +68,9 @@ export function DesktopGeneratedSite({
   const visibleContacts = contacts.filter((contact) => contact.value.trim() && contact.url.trim())
   const visibleEducations = educations.filter((education) => education.institution.trim() || education.course.trim())
   const visibleCertifications = certifications.filter((certification) => certification.name.trim() || certification.issuer.trim())
+  const visibleServices = services.filter((service) => service.title.trim() || service.description.trim())
+  const visibleLanguages = languagesEnabled ? languages.filter((language) => language.name.trim()) : []
+  const visibleTestimonials = testimonials.filter((testimonial) => testimonial.name.trim() || testimonial.quote.trim())
   const terminalUser = name.trim().toLowerCase().replaceAll(' ', '-') || 'dev'
   const initials = name
     .split(' ')
@@ -178,6 +186,19 @@ export function DesktopGeneratedSite({
                 ))}
               </div>
             </div>
+            {visibleLanguages.length > 0 && (
+              <div className="desktop-about-languages">
+                <div className="desktop-language-heading"><small>Idiomas</small><span>{visibleLanguages.length} {visibleLanguages.length === 1 ? 'idioma' : 'idiomas'}</span></div>
+                <div className="desktop-language-grid">
+                  {visibleLanguages.map((language, index) => (
+                    <article key={language.id}>
+                      <span className="desktop-language-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                      <div><strong>{language.name}</strong><small>{language.level || 'Nivel nao informado'}</small></div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )
@@ -222,6 +243,18 @@ export function DesktopGeneratedSite({
           </div>
         </div>
       )
+    }
+
+    if (activeSection === 'services') {
+      return <div className="desktop-copy-content desktop-structured-content"><p className="desktop-window-kicker">Solucoes disponiveis</p><h2>Servicos</h2>{visibleServices.length === 0 && <DesktopEmptyState message="Nenhum servico adicionado." />}<div className="desktop-structured-list">{visibleServices.map((service) => <article key={service.id}><span>{service.deliveryType || 'SERVICO'}</span><div><h3>{service.title || 'Servico'}</h3>{service.description && <p>{service.description}</p>}{service.technologies && <strong>{service.technologies}</strong>}</div></article>)}</div></div>
+    }
+
+    if (activeSection === 'testimonials') {
+      return <div className="desktop-copy-content desktop-structured-content"><p className="desktop-window-kicker">Feedback profissional</p><h2>Depoimentos</h2>{visibleTestimonials.length === 0 && <DesktopEmptyState message="Nenhum depoimento adicionado." />}<div className="desktop-testimonial-list">{visibleTestimonials.map((testimonial) => <blockquote key={testimonial.id}><p>“{testimonial.quote || 'Depoimento nao informado.'}”</p><footer><strong>{testimonial.name || 'Autor'}</strong><span>{[testimonial.role, testimonial.company].filter(Boolean).join(' / ')}</span></footer></blockquote>)}</div></div>
+    }
+
+    if (activeSection === 'availability') {
+      return <div className="desktop-copy-content desktop-availability"><p className="desktop-window-kicker">Situacao profissional</p><h2>Disponibilidade</h2><div className="desktop-availability-status"><i aria-hidden="true" /><div><strong>{availability.status || 'Disponibilidade nao informada'}</strong><span>{availability.workModels || 'Modelo de trabalho nao informado'}</span></div></div>{availability.opportunityTypes && <p><b>Oportunidades:</b> {availability.opportunityTypes}</p>}{availability.note && <p>{availability.note}</p>}</div>
     }
 
     if (activeSection === 'projects') {

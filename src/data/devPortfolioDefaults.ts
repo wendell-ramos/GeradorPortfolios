@@ -1,6 +1,8 @@
-import type { BuilderStep, ContactLink, DefaultSection, DesktopColorTarget, DesktopEditableTarget, DevCertification, DevEducation, DevExperience, DevProject, DevTemplate, DevTemplateOption, PortfolioSection, SectionIcon, TemplateSettings } from '../models/portfolio'
+import type { BuilderStep, ContactLink, DefaultSection, DesktopColorTarget, DesktopEditableTarget, DevAvailability, DevCertification, DevEducation, DevExperience, DevLanguage, DevProject, DevService, DevTemplate, DevTemplateOption, DevTestimonial, PortfolioSection, SectionIcon, TemplateSettings } from '../models/portfolio'
 
 const exampleResumeUrl = `${import.meta.env.BASE_URL}examples/curriculo-wendell-ramos.pdf`
+const exampleProfilePhotoUrl = `${import.meta.env.BASE_URL}examples/perfil-exemplo.svg`
+const exampleProjectImageUrl = `${import.meta.env.BASE_URL}examples/projeto-exemplo.svg`
 
 export const steps: Array<{ id: BuilderStep; label: string }> = [
   { id: 'identity', label: 'Identidade' }, { id: 'style', label: 'Estilo' }, { id: 'sections', label: 'Secoes' },
@@ -19,6 +21,9 @@ export const defaultSections: Record<DefaultSection, Omit<PortfolioSection, 'id'
   stack: { title: 'Stack', description: 'Tecnologias, ferramentas e conhecimentos principais.', icon: 'code', terminalCommand: 'stack', docsGroup: 'Perfil' },
   education: { title: 'Formacao', description: 'Formacao academica, instituicoes e periodo de estudo.', icon: 'document', terminalCommand: 'education', docsGroup: 'Perfil' },
   certifications: { title: 'Cursos e certificados', description: 'Cursos, certificacoes e credenciais profissionais.', icon: 'award', terminalCommand: 'certifications', docsGroup: 'Perfil' },
+  services: { title: 'Servicos', description: 'Solucoes e tipos de entrega oferecidos para clientes e equipes.', icon: 'briefcase', terminalCommand: 'services', docsGroup: 'Trabalho' },
+  testimonials: { title: 'Depoimentos', description: 'Comentarios de clientes, colegas e parceiros profissionais.', icon: 'message', terminalCommand: 'testimonials', docsGroup: 'Trabalho' },
+  availability: { title: 'Disponibilidade', description: 'Situacao atual, modelo de trabalho e oportunidades procuradas.', icon: 'calendar', terminalCommand: 'availability', docsGroup: 'Conecte-se' },
   projects: { title: 'Projetos', description: 'Cases com descricao, tecnologias e links clicaveis.', icon: 'folder', terminalCommand: 'projects', docsGroup: 'Trabalho' },
   contact: { title: 'Contato', description: 'Links para email, GitHub, LinkedIn, WhatsApp ou site.', icon: 'mail', terminalCommand: 'contact', docsGroup: 'Conecte-se' },
 }
@@ -36,7 +41,7 @@ export const defaultTemplateSettings: TemplateSettings = {
     eyebrow: 'Disponivel para novos projetos',
     primaryAction: 'Explorar projetos',
     highlight: 'problema real',
-    resumeUrl: '',
+    resumeUrl: exampleResumeUrl,
     projectLayout: 'showcase',
     motion: 'expressive',
     showMarquee: true,
@@ -65,9 +70,10 @@ export const sectionIconOptions: Array<{ id: SectionIcon; label: string }> = [
 export const sectionPresets: Array<Omit<PortfolioSection, 'id' | 'enabled'> & { id?: string }> = [
   { id: 'education', ...defaultSections.education },
   { id: 'certifications', ...defaultSections.certifications },
+  { id: 'services', ...defaultSections.services },
+  { id: 'testimonials', ...defaultSections.testimonials },
+  { id: 'availability', ...defaultSections.availability },
   { title: 'Eventos', description: 'Hackathons, palestras, visitas tecnicas e experiencias academicas.', icon: 'calendar' },
-  { title: 'Servicos', description: 'Tipos de solucao que voce pode desenvolver para clientes.', icon: 'briefcase' },
-  { title: 'Depoimentos', description: 'Comentarios de clientes, professores, colegas ou parceiros.', icon: 'message' },
 ]
 
 export const contactPresets: Array<Omit<ContactLink, 'id'>> = [
@@ -89,9 +95,72 @@ export function createDefaultSections(): PortfolioSection[] {
   ]
 }
 
+function createPresetSections(): PortfolioSection[] {
+  return [
+    { id: 'about', ...defaultSections.about, enabled: true, locked: true },
+    { id: 'stack', ...defaultSections.stack, enabled: true, locked: true },
+    { id: 'education', ...defaultSections.education, enabled: true },
+    { id: 'certifications', ...defaultSections.certifications, enabled: true },
+    { id: 'services', ...defaultSections.services, enabled: true },
+    { id: 'projects', ...defaultSections.projects, enabled: true, locked: true },
+    { id: 'testimonials', ...defaultSections.testimonials, enabled: true },
+    { id: 'availability', ...defaultSections.availability, enabled: true },
+    { id: 'contact', ...defaultSections.contact, enabled: true, locked: true },
+  ]
+}
+
 export function createPresetDevPortfolio() {
-  const educations: DevEducation[] = []
-  const certifications: DevCertification[] = []
+  const educations: DevEducation[] = [{
+    id: crypto.randomUUID(),
+    institution: 'Universidade do Oeste Paulista',
+    course: 'Sistemas de Informacao',
+    degree: 'Bacharelado',
+    location: 'Presidente Prudente - SP',
+    startYear: '2024',
+    endYear: '',
+    current: true,
+  }]
+  const certifications: DevCertification[] = [{
+    id: crypto.randomUUID(),
+    name: 'Desenvolvimento Web Full Stack',
+    issuer: 'Plataforma de cursos online',
+    issueDate: '2025',
+    credentialId: 'EXEMPLO-FULLSTACK-2025',
+    credentialUrl: 'https://example.com/credenciais/full-stack-2025',
+  }]
+  const services: DevService[] = [
+    {
+      id: crypto.randomUUID(),
+      title: 'Desenvolvimento de sistemas web',
+      description: 'Planejamento e construcao de sistemas responsivos para organizar processos, dados e rotinas de negocio.',
+      technologies: 'React, TypeScript, ASP.NET, PostgreSQL',
+      deliveryType: 'Projeto completo',
+    },
+    {
+      id: crypto.randomUUID(),
+      title: 'Automacoes e dashboards',
+      description: 'Solucoes para reduzir tarefas repetitivas e transformar dados em indicadores claros para tomada de decisao.',
+      technologies: 'JavaScript, C#, SQL, APIs',
+      deliveryType: 'Solucao sob medida',
+    },
+  ]
+  const languages: DevLanguage[] = [
+    { id: crypto.randomUUID(), name: 'Portugues', level: 'Nativo' },
+    { id: crypto.randomUUID(), name: 'Ingles', level: 'Intermediario' },
+  ]
+  const testimonials: DevTestimonial[] = [{
+    id: crypto.randomUUID(),
+    name: 'Cliente de exemplo',
+    role: 'Responsavel pelo projeto',
+    company: 'Projeto demonstrativo',
+    quote: 'Transformou uma necessidade do dia a dia em uma solucao simples, organizada e facil de usar.',
+  }]
+  const availability: DevAvailability = {
+    status: 'Disponivel para oportunidades',
+    workModels: 'Flexivel',
+    opportunityTypes: 'Estagio, projetos web e desenvolvimento de sistemas',
+    note: 'Disponivel para conversar sobre oportunidades remotas, hibridas ou presenciais em Presidente Prudente e regiao.',
+  }
   const experiences: DevExperience[] = [{
     id: crypto.randomUUID(),
     company: 'Projetos independentes',
@@ -104,10 +173,10 @@ export function createPresetDevPortfolio() {
   }]
 
   const projects: DevProject[] = [
-    { id: crypto.randomUUID(), title: 'FinControl', description: 'Controle financeiro pessoal com dashboard, receitas, despesas, metas, categorias e arquitetura publicada na Cloudflare.', imageUrl: '', imageName: '', liveUrl: 'https://fincontrol-2os.pages.dev/', repoUrl: 'https://github.com/wendell-ramos', techs: 'Cloudflare, D1, SQL', category: 'Sistemas web', status: 'Publicado', year: '2026', featured: true },
-    { id: crypto.randomUUID(), title: 'Pericia Contabil', description: 'Sistema web em ASP.NET MVC para gestao de atividades de pericia contabil, usuarios, permissoes e banco PostgreSQL.', imageUrl: '', imageName: '', liveUrl: '', repoUrl: 'https://github.com/wendell-ramos', techs: 'C#, ASP.NET MVC, PostgreSQL', category: 'Sistemas web', status: 'Em desenvolvimento', year: '2026', featured: false },
-    { id: crypto.randomUUID(), title: 'Edvaldo Films', description: 'Portfolio audiovisual responsivo para filmmaker, com trabalhos, processo, contato, dominio proprio e foco em video.', imageUrl: 'https://wendell-ramos.github.io/portfolio-wendell-ramos/assets/projeto-edvaldo-films.png', imageName: 'projeto-edvaldo-films.png', liveUrl: 'https://edvaldofilms.com.br/', repoUrl: '', techs: 'React, Vite, Cloudflare', category: 'Portfolios', status: 'Publicado', year: '2025', featured: false },
-    { id: crypto.randomUUID(), title: 'Portfolio Retro', description: 'Portfolio pessoal em formato de desktop retro, com janelas, atalhos, curriculo, eventos, projetos e contato.', imageUrl: '', imageName: '', liveUrl: 'https://wendell-ramos.github.io/portfolio-wendell-ramos/', repoUrl: 'https://github.com/wendell-ramos/portfolio-wendell-ramos', techs: 'HTML, CSS, JavaScript, GitHub Pages', category: 'Portfolios', status: 'Publicado', year: '2025', featured: false },
+    { id: crypto.randomUUID(), title: 'FinControl', description: 'Controle financeiro pessoal com dashboard, receitas, despesas, metas, categorias e arquitetura publicada na Cloudflare.', imageUrl: exampleProjectImageUrl, imageName: 'fincontrol-exemplo.svg', liveUrl: 'https://fincontrol-2os.pages.dev/', repoUrl: 'https://github.com/wendell-ramos', techs: 'Cloudflare, D1, SQL', category: 'Sistemas web', status: 'Publicado', year: '2026', featured: true },
+    { id: crypto.randomUUID(), title: 'Pericia Contabil', description: 'Sistema web em ASP.NET MVC para gestao de atividades de pericia contabil, usuarios, permissoes e banco PostgreSQL.', imageUrl: exampleProjectImageUrl, imageName: 'pericia-contabil-exemplo.svg', liveUrl: 'https://example.com/projetos/pericia-contabil', repoUrl: 'https://github.com/wendell-ramos', techs: 'C#, ASP.NET MVC, PostgreSQL', category: 'Sistemas web', status: 'Em desenvolvimento', year: '2026', featured: false },
+    { id: crypto.randomUUID(), title: 'Edvaldo Films', description: 'Portfolio audiovisual responsivo para filmmaker, com trabalhos, processo, contato, dominio proprio e foco em video.', imageUrl: 'https://wendell-ramos.github.io/portfolio-wendell-ramos/assets/projeto-edvaldo-films.png', imageName: 'projeto-edvaldo-films.png', liveUrl: 'https://edvaldofilms.com.br/', repoUrl: 'https://example.com/repositorios/edvaldo-films', techs: 'React, Vite, Cloudflare', category: 'Portfolios', status: 'Publicado', year: '2025', featured: false },
+    { id: crypto.randomUUID(), title: 'Portfolio Retro', description: 'Portfolio pessoal em formato de desktop retro, com janelas, atalhos, curriculo, eventos, projetos e contato.', imageUrl: exampleProjectImageUrl, imageName: 'portfolio-retro-exemplo.svg', liveUrl: 'https://wendell-ramos.github.io/portfolio-wendell-ramos/', repoUrl: 'https://github.com/wendell-ramos/portfolio-wendell-ramos', techs: 'HTML, CSS, JavaScript, GitHub Pages', category: 'Portfolios', status: 'Publicado', year: '2025', featured: false },
   ]
 
   const contacts: ContactLink[] = [
@@ -118,6 +187,7 @@ export function createPresetDevPortfolio() {
   ]
 
   return {
+    exampleDataLocked: true,
     template: 'desktop' as DevTemplate,
     accentColor: '#2563eb',
     templateBackgrounds: { ...defaultTemplateBackgrounds },
@@ -128,15 +198,20 @@ export function createPresetDevPortfolio() {
     location: 'Presidente Prudente - SP',
     headline: 'Crio sistemas web, automacoes e produtos digitais com foco em problema real.',
     bio: 'Estudante de Sistemas de Informacao e desenvolvedor focado em sistemas web, automacoes, dashboards e solucoes praticas para organizar processos reais.',
-    profilePhoto: '',
+    profilePhoto: exampleProfilePhotoUrl,
     resumeEnabled: true,
     resumeFile: exampleResumeUrl,
     resumeName: 'Curriculo - Wendell Ramos.pdf',
     experiences,
     educations,
     certifications,
+    languagesEnabled: true,
+    services,
+    languages,
+    testimonials,
+    availability,
     stackText: 'React\nTypeScript\nASP.NET MVC\nC#\nPostgreSQL\nCloudflare',
-    sections: createDefaultSections(),
+    sections: createPresetSections(),
     projects,
     contacts,
   }

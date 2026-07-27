@@ -126,7 +126,7 @@ describe('generated templates', () => {
       educations: [{ id: 'education-1', institution: 'Universidade Exemplo', course: 'Sistemas de Informacao', degree: 'Bacharelado', location: 'Sao Paulo', startYear: '2024', endYear: '', current: true }],
       certifications: [{ id: 'certification-1', name: 'React com TypeScript', issuer: 'Escola Exemplo', issueDate: '07/2026', credentialId: 'ABC-123', credentialUrl: 'https://example.com/credential' }],
       sections: [
-        ...base.sections,
+        ...base.sections.filter((section) => !['education', 'certifications'].includes(section.id)),
         { id: 'education', title: 'Formacao', description: 'Formacao academica', icon: 'document', terminalCommand: 'education', docsGroup: 'Perfil', enabled: true },
         { id: 'certifications', title: 'Cursos e certificados', description: 'Credenciais', icon: 'award', terminalCommand: 'certifications', docsGroup: 'Perfil', enabled: true },
       ],
@@ -148,5 +148,41 @@ describe('generated templates', () => {
 
     rerender(<LandingGeneratedSite {...props} template="landing" />)
     expect(screen.getByRole('heading', { name: 'React com TypeScript' })).toBeInTheDocument()
+  })
+
+  it('renders complementary professional content in every template', () => {
+    vi.useFakeTimers()
+    const base = createPreviewProps()
+    const props = createPreviewProps({
+      services: [{ id: 'service-1', title: 'Sistemas web', description: 'Aplicacoes completas para processos reais.', technologies: 'React, TypeScript', deliveryType: 'Projeto completo' }],
+      languages: [{ id: 'language-1', name: 'Ingles', level: 'Intermediario' }],
+      languagesEnabled: true,
+      testimonials: [{ id: 'testimonial-1', name: 'Cliente Exemplo', role: 'Fundador', company: 'Empresa Exemplo', quote: 'Transformou uma necessidade em uma solucao clara.' }],
+      availability: { status: 'Disponivel para projetos', workModels: 'Remoto', opportunityTypes: 'Freelancer e projetos web', note: 'Disponibilidade para novos projetos.' },
+      sections: [
+        ...base.sections.filter((section) => !['services', 'testimonials', 'availability'].includes(section.id)),
+        { id: 'services', title: 'Servicos', description: 'Servicos oferecidos', icon: 'briefcase', terminalCommand: 'services', docsGroup: 'Trabalho', enabled: true },
+        { id: 'testimonials', title: 'Depoimentos', description: 'Depoimentos', icon: 'message', terminalCommand: 'testimonials', docsGroup: 'Trabalho', enabled: true },
+        { id: 'availability', title: 'Disponibilidade', description: 'Disponibilidade', icon: 'calendar', terminalCommand: 'availability', docsGroup: 'Conecte-se', enabled: true },
+      ],
+    })
+
+    const { rerender } = render(<DesktopGeneratedSite {...props} template="desktop" onBackgroundColorChange={() => undefined} onDesktopAreaColorChange={() => undefined} />)
+    act(() => vi.advanceTimersByTime(1100))
+    fireEvent.click(screen.getByRole('button', { name: 'Servicos' }))
+    expect(screen.getByRole('heading', { name: 'Sistemas web' })).toBeInTheDocument()
+
+    vi.useRealTimers()
+    rerender(<TerminalGeneratedSite {...props} template="terminal" />)
+    fireEvent.click(screen.getByRole('button', { name: 'whoami' }))
+    expect(screen.getByText('LANGUAGE_01')).toBeInTheDocument()
+    expect(screen.getByText('# Intermediario')).toBeInTheDocument()
+
+    rerender(<DocsGeneratedSite {...props} template="docs" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Disponibilidade' }))
+    expect(screen.getByRole('heading', { name: 'Disponivel para projetos' })).toBeInTheDocument()
+
+    rerender(<LandingGeneratedSite {...props} template="landing" />)
+    expect(screen.getByText(/Transformou uma necessidade em uma solucao clara/)).toBeInTheDocument()
   })
 })

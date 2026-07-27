@@ -1,12 +1,13 @@
 import { useEffect, useId, useState, type ChangeEvent } from 'react'
-import { BriefcaseBusiness, CalendarRange, ChevronDown, ChevronUp, FileText, ImagePlus, Plus, Trash2 } from 'lucide-react'
-import type { DevExperience } from '../models/portfolio'
+import { BriefcaseBusiness, CalendarRange, ChevronDown, ChevronUp, FileText, ImagePlus, Languages, Plus, Trash2 } from 'lucide-react'
+import type { DevExperience, DevLanguage } from '../models/portfolio'
 import type { IdentityValidation } from '../utils/validation'
 import { FormSection, StepBlock, TextArea, TextInput } from '../components/BuilderUI'
 import { IdentityMiniPreview } from '../components/PortfolioPreviews'
 
 interface IdentityStepProps {
   addExperience: () => void
+  addLanguage: () => void
   bio: string
   experiences: DevExperience[]
   validationErrors: IdentityValidation
@@ -14,12 +15,16 @@ interface IdentityStepProps {
   handleResumeFile: (event: ChangeEvent<HTMLInputElement>) => void
   headline: string
   location: string
+  languages: DevLanguage[]
+  languagesEnabled: boolean
+  moveLanguage: (id: string, direction: -1 | 1) => void
   moveExperience: (id: string, direction: -1 | 1) => void
   name: string
   profilePhoto: string
   profilePhotoError: string
   removeResumeFile: () => void
   removeExperience: (id: string) => void
+  removeLanguage: (id: string) => void
   resumeEnabled: boolean
   resumeFile: string
   resumeFileError: string
@@ -28,12 +33,14 @@ interface IdentityStepProps {
   setBio: (value: string) => void
   setHeadline: (value: string) => void
   setLocation: (value: string) => void
+  setLanguagesEnabled: (enabled: boolean) => void
   setName: (value: string) => void
   setProfilePhoto: (value: string) => void
   setProfilePhotoError: (value: string) => void
   setResumeEnabled: (value: boolean) => void
   setRole: (value: string) => void
   updateExperience: (id: string, field: keyof Omit<DevExperience, 'id'>, value: string | boolean) => void
+  updateLanguage: <K extends keyof Omit<DevLanguage, 'id'>>(id: string, field: K, value: DevLanguage[K]) => void
 }
 
 const months = [
@@ -111,6 +118,7 @@ function ExperienceDateSelect({
 
 export function IdentityStep({
   addExperience,
+  addLanguage,
   bio,
   experiences,
   validationErrors,
@@ -118,12 +126,16 @@ export function IdentityStep({
   handleResumeFile,
   headline,
   location,
+  languages,
+  languagesEnabled,
+  moveLanguage,
   moveExperience,
   name,
   profilePhoto,
   profilePhotoError,
   removeResumeFile,
   removeExperience,
+  removeLanguage,
   resumeEnabled,
   resumeFile,
   resumeFileError,
@@ -132,12 +144,14 @@ export function IdentityStep({
   setBio,
   setHeadline,
   setLocation,
+  setLanguagesEnabled,
   setName,
   setProfilePhoto,
   setProfilePhotoError,
   setResumeEnabled,
   setRole,
   updateExperience,
+  updateLanguage,
 }: IdentityStepProps) {
   return (
   <StepBlock
@@ -219,6 +233,38 @@ export function IdentityStep({
             <span><strong>Curriculo oculto</strong><small>Nenhum botao, comando ou secao de curriculo sera gerado.</small></span>
           </div>
         )}
+      </div>
+      <div className={`${languagesEnabled ? 'is-enabled' : 'is-disabled'} language-profile-field`}>
+        <label className="resume-enable-row language-enable-row">
+          <input checked={languagesEnabled} onChange={(event) => setLanguagesEnabled(event.target.checked)} type="checkbox" />
+          <span className="resume-enable-switch" aria-hidden="true"><i /></span>
+          <span><strong>Exibir idiomas no Sobre mim</strong><small>Opcional. Ative para apresentar os idiomas junto da sua trajetoria.</small></span>
+          <b>{languagesEnabled ? 'Ativado' : 'Desativado'}</b>
+        </label>
+        {languagesEnabled ? (
+          <div className="language-profile-content">
+            <div className="language-profile-heading">
+              <span><Languages aria-hidden="true" /></span>
+              <div><strong>Idiomas</strong><small>Adicione um idioma e selecione seu nivel atual.</small></div>
+              <button onClick={addLanguage} type="button"><Plus aria-hidden="true" />Adicionar idioma</button>
+            </div>
+            <div className="language-profile-list">
+              {languages.length === 0 && <div className="language-profile-empty"><Languages aria-hidden="true" /><span><strong>Nenhum idioma adicionado</strong><small>Use o botao acima para incluir o primeiro idioma.</small></span></div>}
+              {languages.map((language, index) => (
+                <article className="language-profile-entry" key={language.id}>
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <TextInput label="Idioma" onChange={(value) => updateLanguage(language.id, 'name', value)} placeholder="Ex.: Ingles" value={language.name} />
+                  <label className="language-level-field"><span>Nivel</span><select onChange={(event) => updateLanguage(language.id, 'level', event.target.value)} value={language.level}><option value="">Selecione</option><option value="Basico">Basico</option><option value="Intermediario">Intermediario</option><option value="Avancado">Avancado</option><option value="Fluente">Fluente</option><option value="Nativo">Nativo</option></select></label>
+                  <div className="language-entry-actions">
+                    <button aria-label="Mover idioma para cima" disabled={index === 0} onClick={() => moveLanguage(language.id, -1)} type="button"><ChevronUp aria-hidden="true" /></button>
+                    <button aria-label="Mover idioma para baixo" disabled={index === languages.length - 1} onClick={() => moveLanguage(language.id, 1)} type="button"><ChevronDown aria-hidden="true" /></button>
+                    <button aria-label="Remover idioma" onClick={() => removeLanguage(language.id)} type="button"><Trash2 aria-hidden="true" /></button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        ) : <div className="resume-disabled-note language-disabled-note"><Languages aria-hidden="true" /><span><strong>Idiomas ocultos</strong><small>Nenhuma informacao de idioma sera exibida no Sobre mim.</small></span></div>}
       </div>
     </FormSection>
     <div className="experience-builder">

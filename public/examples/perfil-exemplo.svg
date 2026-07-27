@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="title description">
+  <title id="title">Perfil demonstrativo</title>
+  <desc id="description">Avatar abstrato usado nos dados de exemplo.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" rx="80" fill="url(#background)"/>
+  <circle cx="200" cy="145" r="72" fill="#f8fafc" opacity=".94"/>
+  <path d="M72 360c14-91 62-137 128-137s114 46 128 137" fill="#f8fafc" opacity=".94"/>
+  <circle cx="324" cy="76" r="28" fill="#22c55e"/>
+</svg>

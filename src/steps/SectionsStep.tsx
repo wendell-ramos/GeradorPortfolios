@@ -1,16 +1,20 @@
-import type { DevCertification, DevEducation, DevTemplate, PortfolioSection, SectionIcon } from '../models/portfolio'
+import type { DevAvailability, DevCertification, DevEducation, DevService, DevTemplate, DevTestimonial, PortfolioSection, SectionIcon } from '../models/portfolio'
 import { sectionIconOptions, sectionPresets } from '../data/devPortfolioDefaults'
 import { defaultSectionSurface, terminalSlug } from '../utils/portfolio'
 import { StepBlock, TextArea, TextInput } from '../components/BuilderUI'
 import { SectionIconGlyph } from '../components/PortfolioIcons'
 import { SectionsMiniPreview, TemplateEditorBanner } from '../components/PortfolioPreviews'
 import { ProfessionalContentEditors } from '../components/ProfessionalContentEditors'
+import { ComplementaryContentEditors } from '../components/ComplementaryContentEditors'
 
 interface SectionsStepProps {
   addCustomSection: () => void
   addPresetSection: (section: Omit<PortfolioSection, 'id' | 'enabled'> & { id?: string }) => void
   addCertification: () => void
   addEducation: () => void
+  addService: () => void
+  addTestimonial: () => void
+  availability: DevAvailability
   certifications: DevCertification[]
   customSectionDescription: string
   customSectionIcon: SectionIcon
@@ -19,10 +23,15 @@ interface SectionsStepProps {
   educations: DevEducation[]
   moveCertification: (id: string, direction: -1 | 1) => void
   moveEducation: (id: string, direction: -1 | 1) => void
+  moveService: (id: string, direction: -1 | 1) => void
+  moveTestimonial: (id: string, direction: -1 | 1) => void
   moveSection: (id: string, direction: -1 | 1) => void
   removeSection: (id: string) => void
   removeCertification: (id: string) => void
   removeEducation: (id: string) => void
+  removeService: (id: string) => void
+  removeTestimonial: (id: string) => void
+  services: DevService[]
   sections: PortfolioSection[]
   setCustomSectionDescription: (value: string) => void
   setCustomSectionIcon: (icon: SectionIcon) => void
@@ -38,6 +47,10 @@ interface SectionsStepProps {
   updateSectionTerminalCommand: (id: string, command: string) => void
   updateCertification: <K extends keyof Omit<DevCertification, 'id'>>(id: string, field: K, value: DevCertification[K]) => void
   updateEducation: <K extends keyof Omit<DevEducation, 'id'>>(id: string, field: K, value: DevEducation[K]) => void
+  testimonials: DevTestimonial[]
+  updateAvailability: <K extends keyof DevAvailability>(field: K, value: DevAvailability[K]) => void
+  updateService: <K extends keyof Omit<DevService, 'id'>>(id: string, field: K, value: DevService[K]) => void
+  updateTestimonial: <K extends keyof Omit<DevTestimonial, 'id'>>(id: string, field: K, value: DevTestimonial[K]) => void
 }
 
 export function SectionsStep({
@@ -45,6 +58,9 @@ export function SectionsStep({
   addPresetSection,
   addCertification,
   addEducation,
+  addService,
+  addTestimonial,
+  availability,
   certifications,
   customSectionDescription,
   customSectionIcon,
@@ -53,10 +69,15 @@ export function SectionsStep({
   educations,
   moveCertification,
   moveEducation,
+  moveService,
+  moveTestimonial,
   moveSection,
   removeSection,
   removeCertification,
   removeEducation,
+  removeService,
+  removeTestimonial,
+  services,
   sections,
   setCustomSectionDescription,
   setCustomSectionIcon,
@@ -72,6 +93,10 @@ export function SectionsStep({
   updateSectionTerminalCommand,
   updateCertification,
   updateEducation,
+  testimonials,
+  updateAvailability,
+  updateService,
+  updateTestimonial,
 }: SectionsStepProps) {
   return (
   <StepBlock
@@ -174,6 +199,24 @@ export function SectionsStep({
       removeEducation={removeEducation}
       updateCertification={updateCertification}
       updateEducation={updateEducation}
+    />
+
+    <ComplementaryContentEditors
+      addService={addService}
+      addTestimonial={addTestimonial}
+      availability={availability}
+      hasAvailabilitySection={sections.some((section) => section.id === 'availability')}
+      hasServicesSection={sections.some((section) => section.id === 'services')}
+      hasTestimonialsSection={sections.some((section) => section.id === 'testimonials')}
+      moveService={moveService}
+      moveTestimonial={moveTestimonial}
+      removeService={removeService}
+      removeTestimonial={removeTestimonial}
+      services={services}
+      testimonials={testimonials}
+      updateAvailability={updateAvailability}
+      updateService={updateService}
+      updateTestimonial={updateTestimonial}
     />
 
     <div className="add-box">

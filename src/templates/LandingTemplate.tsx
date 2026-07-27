@@ -12,6 +12,11 @@ export function LandingGeneratedSite({
   certifications,
   educations,
   experiences,
+  services,
+  languages,
+  languagesEnabled,
+  testimonials,
+  availability,
   headline,
   location,
   name,
@@ -43,6 +48,9 @@ export function LandingGeneratedSite({
   const visibleExperiences = experiences.filter((experience) => experience.company.trim() || experience.role.trim())
   const visibleEducations = educations.filter((education) => education.institution.trim() || education.course.trim())
   const visibleCertifications = certifications.filter((certification) => certification.name.trim() || certification.issuer.trim())
+  const visibleServices = services.filter((service) => service.title.trim() || service.description.trim())
+  const visibleLanguages = languagesEnabled ? languages.filter((language) => language.name.trim()) : []
+  const visibleTestimonials = testimonials.filter((testimonial) => testimonial.name.trim() || testimonial.quote.trim())
   const firstSectionId = renderedSections[0]?.id
   const metrics = [
     { value: settings.metricOneValue, label: settings.metricOneLabel },
@@ -124,7 +132,10 @@ export function LandingGeneratedSite({
               <section className="landing-section landing-about" id="landing-about" key={section.id}>
                 <LandingSectionHeading index={sectionIndex} label="Sobre mim" title="Codigo com contexto. Design com intencao." />
                 <div className="landing-about-grid">
-                  <p className="landing-about-lead">{bio || 'Conte aqui sua trajetoria, seus interesses e o tipo de impacto que busca criar.'}</p>
+                  <div className="landing-about-profile">
+                    <p className="landing-about-lead">{bio || 'Conte aqui sua trajetoria, seus interesses e o tipo de impacto que busca criar.'}</p>
+                    {visibleLanguages.length > 0 && <div className="landing-about-languages"><span>Idiomas</span>{visibleLanguages.map((language, languageIndex) => <p key={language.id}><i aria-hidden="true">{String(languageIndex + 1).padStart(2, '0')}</i><strong>{language.name}</strong><small>{language.level || 'Nivel nao informado'}</small></p>)}</div>}
+                  </div>
                   <div className="landing-experience-list">
                     <span>Trajetoria recente</span>
                     {visibleExperiences.length ? visibleExperiences.map((experience) => (
@@ -224,6 +235,18 @@ export function LandingGeneratedSite({
                 </div>
               </section>
             )
+          }
+
+          if (section.id === 'services') {
+            return <section className="landing-section landing-records landing-services" id="landing-services" key={section.id}><LandingSectionHeading index={sectionIndex} label="Servicos" title="Solucoes pensadas para sair do papel." /><div className="landing-record-list">{visibleServices.length ? visibleServices.map((service, itemIndex) => <article key={service.id}><span>{String(itemIndex + 1).padStart(2, '0')}</span><div><small>{service.deliveryType || 'Solucao digital'}</small><h3>{service.title || 'Servico'}</h3><p>{service.description || 'Descricao ainda nao informada.'}</p>{service.technologies && <strong>{service.technologies}</strong>}</div></article>) : <p className="landing-record-empty">Nenhum servico cadastrado.</p>}</div></section>
+          }
+
+          if (section.id === 'testimonials') {
+            return <section className="landing-section landing-testimonials" id="landing-testimonials" key={section.id}><LandingSectionHeading index={sectionIndex} label="Depoimentos" title="O trabalho contado por quem esteve perto." /><div className="landing-testimonial-grid">{visibleTestimonials.length ? visibleTestimonials.map((testimonial) => <blockquote key={testimonial.id}><p>“{testimonial.quote || 'Depoimento nao informado.'}”</p><footer><strong>{testimonial.name || 'Autor'}</strong><span>{[testimonial.role, testimonial.company].filter(Boolean).join(' / ')}</span></footer></blockquote>) : <p>Nenhum depoimento cadastrado.</p>}</div></section>
+          }
+
+          if (section.id === 'availability') {
+            return <section className="landing-availability" id="landing-availability" key={section.id}><span>{sectionIndex} / Disponibilidade</span><div><p><i />{availability.status || 'Situacao profissional nao informada'}</p><h2>{availability.opportunityTypes || 'Aberto a boas conversas e novos desafios.'}</h2><strong>{availability.workModels || 'Modelo de trabalho flexivel'}</strong>{availability.note && <small>{availability.note}</small>}</div></section>
           }
 
           if (section.id === 'contact') {

@@ -29,6 +29,12 @@ describe('portfolio draft storage', () => {
     await expect(readPortfolioDraft()).resolves.toEqual(draft)
   })
 
+  it('locks example drafts created before the lock flag existed', () => {
+    const legacyExample = createDraft({ exampleDataLocked: false })
+
+    expect(normalizePortfolioDraft(legacyExample)?.exampleDataLocked).toBe(true)
+  })
+
   it('ignores drafts with an unsupported version', async () => {
     const unsupportedDraft = {
       ...createDraft(),
@@ -69,6 +75,11 @@ describe('portfolio draft storage', () => {
     expect(normalized?.sections).not.toHaveLength(0)
     expect(normalized?.educations).toEqual([])
     expect(normalized?.certifications).toEqual([])
+    expect(normalized?.languagesEnabled).toBe(false)
+    expect(normalized?.services).toEqual([])
+    expect(normalized?.languages).toEqual([])
+    expect(normalized?.testimonials).toEqual([])
+    expect(normalized?.availability).toEqual({ status: '', workModels: '', opportunityTypes: '', note: '' })
   })
 
   it('ignores malformed values instead of exposing them to the app', () => {
@@ -78,6 +89,9 @@ describe('portfolio draft storage', () => {
       experiences: [],
       educations: [],
       certifications: [],
+      services: [],
+      languages: [],
+      testimonials: [],
       projects: [],
       contacts: [],
     })
