@@ -816,14 +816,14 @@ function App() {
         </nav>
       )}
 
-      <section className={`flow-card${exampleDataLocked && step !== 'preview' ? ' has-example-lock' : ''}`}>
-        {exampleDataLocked && step !== 'preview' && (
+      <section className={`flow-card${exampleDataLocked && step !== 'style' && step !== 'preview' ? ' has-example-lock' : ''}`}>
+        {exampleDataLocked && step !== 'style' && step !== 'preview' && (
           <div className="example-data-lock-notice" role="status">
             <Check aria-hidden="true" />
             <span><strong>Dados de exemplo fixos</strong><small>Este conteudo demonstrativo nao pode ser editado, removido ou reordenado.</small></span>
           </div>
         )}
-        <fieldset className="example-data-lock-surface" disabled={exampleDataLocked && step !== 'preview'}>
+        <fieldset className="example-data-lock-surface" disabled={exampleDataLocked && step !== 'style' && step !== 'preview'}>
         {step === 'identity' && (
           <IdentityStep
             addLanguage={addLanguage}

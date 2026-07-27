@@ -55,6 +55,22 @@ describe('portfolio builder flow', () => {
     expect(screen.getByText('Situacao atual, modelo de trabalho e oportunidades procuradas.')).toBeInTheDocument()
   })
 
+  it('keeps template selection available with fixed example data', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(await screen.findByRole('button', { name: /Usar dados de exemplo/ }))
+    await user.click(screen.getByRole('button', { name: 'Continuar' }))
+
+    const terminalTemplate = screen.getByRole('button', { name: /Terminal hacker/ })
+    expect(terminalTemplate).toBeEnabled()
+
+    await user.click(terminalTemplate)
+
+    expect(screen.getByText('Ambiente do terminal')).toBeInTheDocument()
+    expect(terminalTemplate).toHaveClass('is-active')
+  })
+
   it('restores the saved step and template from IndexedDB', async () => {
     await writePortfolioDraft(createDraft({
       step: 'preview',
